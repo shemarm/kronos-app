@@ -1,0 +1,30 @@
+{
+  "name": "kronos-backend",
+  "version": "1.0.0",
+  "description": "Backend server for the Kronos HR & Attendance System",
+  "author": "",
+  "license": "ISC",
+  "main": "src/server.js",
+  "scripts": {
+    "dev": "nodemon src/server.js",
+    "start": "node src/server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "express",
+    "postgres",
+    "attendance",
+    "hr",
+    "backend",
+    "kronos"
+  ],
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "pg": "^8.11.3"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.0"
+  }
+}

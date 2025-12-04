@@ -1,0 +1,3180 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>K.R.O.N.O.S – Attendance Management</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #020617;
+      --accent: #38bdf8;
+      --accent-soft: rgba(56, 189, 248, 0.22);
+      --text-main: #f9fafb;
+      --text-muted: #9ca3af;
+      --card-bg: #020617;
+      --border-subtle: rgba(148, 163, 184, 0.35);
+      --radius: 20px;
+      --shadow: 0 24px 60px rgba(15, 23, 42, 0.9);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      background: radial-gradient(circle at top, #020617 0, #020617 40%, #000 100%);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      align-items: stretch;
+      justify-content: center;
+    }
+
+    #app {
+      width: 100%;
+      max-width: 1200px;
+      margin: 24px 16px;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    /* LOGIN SCREEN – HOSPITAL UI */
+
+    #login-screen {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 80vh;
+    }
+
+    .login-shell {
+      width: 100%;
+      max-width: 1100px;
+      border-radius: 26px;
+      overflow: hidden;
+      border: 1px solid rgba(148, 163, 184, 0.55);
+      background: radial-gradient(circle at top, #020617 0, #020617 45%, #020617 100%);
+      box-shadow: 0 28px 80px rgba(15, 23, 42, 0.9);
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+    }
+
+    @media (max-width: 900px) {
+      .login-shell {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    .login-panel {
+      padding: 32px 32px 28px;
+    }
+
+    .login-panel-left {
+      background:
+        radial-gradient(circle at top left, rgba(56, 189, 248, 0.20), transparent 55%),
+        radial-gradient(circle at bottom right, rgba(52, 211, 153, 0.16), transparent 60%),
+        #020617;
+      border-right: 1px solid rgba(30, 64, 175, 0.9);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 32px;
+    }
+
+    .login-panel-right {
+      background:
+        radial-gradient(circle at top right, rgba(37, 99, 235, 0.32), transparent 65%),
+        radial-gradient(circle at bottom, rgba(15, 23, 42, 0.95), #020617);
+      position: relative;
+    }
+
+    .login-brand-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 28px;
+      gap: 12px;
+    }
+
+    .login-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-logo {
+      width: 36px;
+      height: 36px;
+      border-radius: 999px;
+      background: radial-gradient(circle at top left, #22d3ee, #0f172a);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 16px;
+      border: 1px solid rgba(56, 189, 248, 0.8);
+      box-shadow: 0 10px 30px rgba(8, 47, 73, 0.8);
+    }
+
+    .brand-text-main {
+      font-size: 17px;
+      font-weight: 700;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+    }
+
+    .brand-text-sub {
+      font-size: 11px;
+      color: #cbd5f5;
+    }
+
+    .login-hospital-tag {
+      font-size: 11px;
+      text-align: right;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    .left-section-title {
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: #7dd3fc;
+      margin-bottom: 6px;
+    }
+
+    .left-main-heading {
+      font-size: 23px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .left-subtext {
+      font-size: 13px;
+      color: #d1d5db;
+      margin-bottom: 12px;
+    }
+
+    .left-list {
+      list-style: disc;
+      padding-left: 18px;
+      font-size: 13px;
+      color: #e5e7eb;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .left-footer {
+      font-size: 11px;
+      color: var(--text-muted);
+      max-width: 420px;
+    }
+
+    .right-inner {
+      max-width: 430px;
+      margin-left: auto;
+    }
+
+    .role-toggle {
+      display: inline-flex;
+      padding: 3px;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.9);
+      background: rgba(15, 23, 42, 0.85);
+      margin-bottom: 18px;
+      gap: 4px;
+      box-shadow: 0 12px 35px rgba(15, 23, 42, 0.9);
+    }
+
+    .role-pill {
+      border-radius: 999px;
+      padding: 5px 12px;
+      font-size: 12px;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: background 0.15s ease, color 0.15s ease;
+    }
+
+    .role-pill.active {
+      background: linear-gradient(135deg, #38bdf8, #4f46e5);
+      color: #e0f2fe;
+    }
+
+    .login-main-heading {
+      font-size: 21px;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    .login-main-sub {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+    }
+
+    .field-label {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+
+    .field {
+      margin-bottom: 16px;
+    }
+
+    .input {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--border-subtle);
+      background: rgba(15, 23, 42, 0.9);
+      color: var(--text-main);
+      font-size: 14px;
+      outline: none;
+      transition: border 0.15s ease, box-shadow 0.15s ease, background 0.15s ease, transform 0.08s ease;
+    }
+
+    .input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px var(--accent-soft);
+      background: rgba(15, 23, 42, 0.98);
+      transform: translateY(-0.5px);
+    }
+
+    .input-with-toggle {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .input-with-toggle .input {
+      padding-right: 34px;
+    }
+
+    .eye-btn {
+      position: absolute;
+      right: 10px;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .eye-btn:hover {
+      color: #e5e7eb;
+    }
+
+    .btn-primary {
+      width: 100%;
+      padding: 10px 14px;
+      border-radius: 999px;
+      border: none;
+      background: linear-gradient(135deg, var(--accent), #4f46e5);
+      color: white;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      transition: transform 0.1s ease, box-shadow 0.1s ease, filter 0.1s ease;
+      box-shadow: 0 18px 40px rgba(37, 99, 235, 0.65);
+      margin-top: 4px;
+    }
+
+    .btn-primary:hover {
+      filter: brightness(1.06);
+      transform: translateY(-1px);
+    }
+
+    .btn-primary:active {
+      transform: translateY(0);
+      box-shadow: 0 12px 26px rgba(30, 64, 175, 0.7);
+    }
+
+    .login-hint {
+      margin-top: 8px;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .login-footer-text {
+      margin-top: 18px;
+      font-size: 11px;
+      color: var(--text-muted);
+      max-width: 420px;
+    }
+
+    .error {
+      margin-top: 6px;
+      font-size: 12px;
+      color: #f97373;
+      text-align: center;
+    }
+
+    /* DASHBOARD LAYOUT */
+
+    #dashboard-screen {
+      background: rgba(15, 23, 42, 0.96);
+      border-radius: 24px;
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      box-shadow: var(--shadow);
+      padding: 18px 20px 22px;
+    }
+
+    .dash-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-icon {
+      width: 34px;
+      height: 34px;
+      border-radius: 12px;
+      border: 1px solid rgba(56, 189, 248, 0.55);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      background: radial-gradient(circle at top left, rgba(45, 212, 191, 0.35), rgba(15, 23, 42, 0.95));
+    }
+
+    .brand-title {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+    }
+
+    .brand-sub {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .nav {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .nav-link {
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      color: var(--text-muted);
+      border: 1px solid transparent;
+      background: transparent;
+      cursor: pointer;
+      transition: background 0.15s ease, color 0.15s ease, border 0.15s ease;
+    }
+
+    .nav-link:hover {
+      background: rgba(15, 23, 42, 0.85);
+      border-color: rgba(148, 163, 184, 0.6);
+      color: var(--text-main);
+    }
+
+    .nav-link.active {
+      background: rgba(37, 99, 235, 0.22);
+      border-color: rgba(59, 130, 246, 0.7);
+      color: #bfdbfe;
+    }
+
+    .user-area {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .pill {
+      border-radius: 999px;
+      padding: 4px 10px;
+      font-size: 11px;
+      border: 1px solid rgba(148, 163, 184, 0.6);
+      color: var(--text-muted);
+    }
+
+    .btn-ghost {
+      padding: 5px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.7);
+      background: transparent;
+      color: var(--text-main);
+      font-size: 11px;
+      cursor: pointer;
+      transition: background 0.15s ease, color 0.15s ease, border 0.15s ease;
+    }
+
+    .btn-ghost:hover {
+      background: rgba(148, 163, 184, 0.12);
+    }
+
+    /* Notification bell */
+
+    .notif-wrapper {
+      position: relative;
+    }
+
+    .notif-btn {
+      position: relative;
+      padding: 6px 9px;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.7);
+      background: rgba(15, 23, 42, 0.9);
+      color: var(--text-main);
+      cursor: pointer;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .notif-count {
+      min-width: 16px;
+      height: 16px;
+      border-radius: 999px;
+      background: #f97316;
+      color: white;
+      font-size: 10px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .notif-dropdown {
+      position: absolute;
+      right: 0;
+      margin-top: 6px;
+      width: 260px;
+      background: rgba(15, 23, 42, 0.98);
+      border-radius: 14px;
+      border: 1px solid rgba(148, 163, 184, 0.7);
+      box-shadow: 0 18px 40px rgba(15, 23, 42, 0.9);
+      padding: 10px 10px 8px;
+      z-index: 20;
+    }
+
+    .notif-dropdown h4 {
+      font-size: 12px;
+      margin-bottom: 6px;
+      color: var(--text-muted);
+    }
+
+    .notif-list {
+      list-style: none;
+      max-height: 220px;
+      overflow-y: auto;
+    }
+
+    .notif-list li {
+      padding: 6px 4px;
+      font-size: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      border-bottom: 1px solid rgba(51, 65, 85, 0.75);
+    }
+
+    .notif-actions {
+      display: flex;
+      gap: 6px;
+    }
+
+    .notif-actions button {
+      flex: 1;
+      font-size: 11px;
+      padding: 3px 6px;
+      border-radius: 999px;
+      border: none;
+      cursor: pointer;
+    }
+
+    .notif-approve {
+      background: rgba(34, 197, 94, 0.2);
+      color: #4ade80;
+    }
+
+    .notif-reject {
+      background: rgba(239, 68, 68, 0.16);
+      color: #fecaca;
+    }
+
+    /* CONTENT */
+
+    .dash-main {
+      margin-top: 8px;
+      border-radius: 18px;
+      background: radial-gradient(circle at top, rgba(30, 64, 175, 0.35), rgba(15, 23, 42, 0.98));
+      border: 1px solid rgba(51, 65, 85, 0.9);
+      padding: 14px 16px 16px;
+    }
+
+    .view-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .view-subtitle {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+    }
+
+    .grid {
+      display: grid;
+      gap: 10px;
+    }
+
+    @media (min-width: 900px) {
+      .grid-3 {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .grid-2 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    .card {
+      border-radius: 14px;
+      border: 1px solid rgba(51, 65, 85, 0.9);
+      background: rgba(15, 23, 42, 0.9);
+      padding: 10px 12px;
+      font-size: 13px;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+
+    .card-title {
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    .badge {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(56, 189, 248, 0.6);
+      color: #e0f2fe;
+    }
+
+    .metric {
+      font-size: 18px;
+      font-weight: 600;
+      margin-top: 2px;
+    }
+
+    .muted {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .section {
+      margin-top: 6px;
+    }
+
+    .section-title {
+      font-size: 13px;
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+
+    .section-body {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    /* FORMS + TABLES */
+
+    .form-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .form-row .field {
+      flex: 1;
+      min-width: 120px;
+      margin-bottom: 0;
+    }
+
+    .btn-small {
+      padding: 7px 12px;
+      border-radius: 999px;
+      border: none;
+      background: rgba(37, 99, 235, 0.9);
+      color: white;
+      font-size: 11px;
+      cursor: pointer;
+      margin-top: 2px;
+    }
+
+    .btn-small:hover {
+      background: rgba(59, 130, 246, 0.95);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 6px;
+      font-size: 11px;
+    }
+
+    th,
+    td {
+      padding: 6px 6px;
+      border-bottom: 1px solid rgba(30, 64, 175, 0.7);
+      text-align: left;
+    }
+
+    th {
+      font-weight: 500;
+      color: #e5e7eb;
+      background: rgba(15, 23, 42, 0.9);
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    .pill-status {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 999px;
+      padding: 1px 8px;
+      font-size: 10px;
+    }
+
+    /* Leave actions dropdown for HR */
+    .leave-actions-wrapper {
+      display: inline-flex;
+      align-items: center;
+      margin-left: 6px;
+      position: relative;
+    }
+
+    .leave-action-toggle {
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.7);
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 10px;
+      padding: 1px 6px;
+      margin-left: 4px;
+      cursor: pointer;
+    }
+
+    .leave-action-toggle:hover {
+      background: rgba(148, 163, 184, 0.16);
+      color: #e5e7eb;
+    }
+
+    .leave-action-menu {
+      position: absolute;
+      right: 0;
+      top: 100%;
+      margin-top: 2px;
+      background: rgba(15, 23, 42, 0.98);
+      border-radius: 8px;
+      border: 1px solid rgba(148, 163, 184, 0.7);
+      box-shadow: 0 12px 30px rgba(15, 23, 42, 0.9);
+      min-width: 120px;
+      z-index: 30;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .leave-action-menu button {
+      background: transparent;
+      border: none;
+      color: #e5e7eb;
+      font-size: 11px;
+      padding: 5px 10px;
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .leave-action-menu button:hover {
+      background: rgba(37, 99, 235, 0.18);
+    }
+
+    .leave-action-menu button.leave-action-reject:hover {
+      background: rgba(239, 68, 68, 0.18);
+    }
+
+    .status-pending {
+      background: rgba(234, 179, 8, 0.17);
+      color: #facc15;
+    }
+
+    .status-approved {
+      background: rgba(34, 197, 94, 0.18);
+      color: #86efac;
+    }
+
+    .status-rejected {
+      background: rgba(239, 68, 68, 0.16);
+      color: #fecaca;
+    }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 5px;
+    }
+
+    .chip {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      border: 1px dashed rgba(148, 163, 184, 0.8);
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+
+<body>
+  <div id="app">
+    <!-- LOGIN SCREEN -->
+    <section id="login-screen">
+      <div id="login-shell" class="login-shell" data-role="employee">
+        <!-- LEFT PANEL -->
+        <div class="login-panel login-panel-left">
+          <div>
+            <div class="login-brand-row">
+              <div class="login-brand">
+                <div class="brand-logo">KR</div>
+                <div>
+                  <div class="brand-text-main">K.R.O.N.O.S</div>
+                  <div class="brand-text-sub">
+                    Knowledge-driven Recording of Operations, Notifications &amp; Organized Schedules
+                  </div>
+                </div>
+              </div>
+              <div class="login-hospital-tag">
+                St. Ann’s Bay Regional Hospital<br />
+                Digital Attendance Portal
+              </div>
+            </div>
+
+            <div id="left-copy-employee">
+              <div class="left-section-title">Secure access</div>
+              <div class="left-main-heading">Employee portal</div>
+              <div class="left-subtext">
+                Sign in to view shifts, clock-in history and leave balances.
+              </div>
+              <ul class="left-list">
+                <li>Real-time QR attendance tracking.</li>
+                <li>View upcoming shifts and work hours.</li>
+                <li>Submit leave and missed punch requests.</li>
+              </ul>
+            </div>
+
+            <div id="left-copy-hr" class="hidden">
+              <div class="left-section-title">Secure access</div>
+              <div class="left-main-heading">HR &amp; Management console</div>
+              <div class="left-subtext">
+                Analyze presence patterns, investigate exceptions and manage staffing.
+              </div>
+              <ul class="left-list">
+                <li>View lateness, absences and overtime patterns.</li>
+                <li>Approve or reject leave and correction requests.</li>
+                <li>Manage shifts, departments and staff allocations.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="left-footer">
+            By signing in, you confirm that you are an authorized user of the hospital’s attendance and scheduling
+            system.
+          </div>
+        </div>
+
+        <!-- RIGHT PANEL -->
+        <div class="login-panel login-panel-right">
+          <div class="right-inner">
+            <div class="role-toggle">
+              <button id="toggle-employee" class="role-pill active">Employee</button>
+              <button id="toggle-hr" class="role-pill">HR / Manager</button>
+            </div>
+
+            <h2 id="login-main-heading" class="login-main-heading">Employee sign in</h2>
+            <p id="login-main-sub" class="login-main-sub">
+              Use your staff ID and password to access your attendance and shift information.
+            </p>
+
+            <form id="login-form">
+              <input type="hidden" id="role" value="employee" />
+
+              <div class="field">
+                <div class="field-label">Staff ID / Username</div>
+                <input id="username" type="text" class="input" autocomplete="off" />
+              </div>
+
+              <div class="field">
+                <div class="field-label">Password</div>
+                <div class="input-with-toggle">
+                  <input id="password" type="password" class="input" autocomplete="off" />
+                  <button type="button" id="toggle-password" class="eye-btn" aria-label="Show password">👁</button>
+                </div>
+              </div>
+
+              <button type="submit" class="btn-primary" id="login-submit-btn">
+                <span id="sign-in-label">Sign in as Employee</span>
+              </button>
+              <div id="login-error" class="error hidden"></div>
+            </form>
+
+            <p id="login-hint-employee" class="login-hint">
+              Employees: contact HR if you do not have your login yet.
+            </p>
+            <p id="login-hint-hr" class="login-hint hidden">
+              HR/Managers: use your HR credentials issued by IT.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- DASHBOARD SCREEN -->
+    <section id="dashboard-screen" class="hidden">
+      <header class="dash-header">
+        <div class="brand">
+          <div class="brand-icon">⏱</div>
+          <div>
+            <div class="brand-title">K.R.O.N.O.S</div>
+            <div class="brand-sub">Smart attendance, shift &amp; leave tracking</div>
+          </div>
+        </div>
+
+        <nav class="nav">
+          <button class="nav-link active" data-target="dashboard">Overview</button>
+          <button class="nav-link" data-target="attendance">Attendance</button>
+          <button class="nav-link" data-target="leave">Leave &amp; Absence</button>
+          <button class="nav-link" data-target="shifts">Shift Management</button>
+          <button class="nav-link" data-target="reports">Reports</button>
+        </nav>
+
+        <div class="user-area">
+          <div class="notif-wrapper" id="notif-wrapper">
+            <button class="notif-btn" id="notif-btn">
+              🔔
+              <span class="notif-count hidden" id="notif-count">0</span>
+            </button>
+            <div class="notif-dropdown hidden" id="notif-dropdown">
+              <h4 id="notif-title">Notifications</h4>
+              <ul class="notif-list" id="notif-list">
+                <!-- JS -->
+              </ul>
+            </div>
+          </div>
+          <div class="pill" id="user-role-pill">
+            Role: <span id="user-role-label">Employee</span> • User: <span id="user-name-label">-</span>
+          </div>
+          <button id="logout-btn" class="btn-ghost">Log out</button>
+        </div>
+      </header>
+
+      <main class="dash-main">
+        <!-- OVERVIEW -->
+        <section class="view" data-view-id="dashboard">
+          <h2 class="view-title">Today at a glance</h2>
+          <p class="view-subtitle">Quick snapshot of attendance, requests and workload.</p>
+
+          <div class="grid grid-3">
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">Attendance</div>
+                <span class="badge">Live</span>
+              </div>
+              <div class="metric" id="metric-attendance">0</div>
+              <div class="muted">Total clock-ins recorded in this session.</div>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">Leave requests</div>
+                <span class="badge">Session</span>
+              </div>
+              <div class="metric" id="metric-leave">0</div>
+              <div class="muted">Submitted &amp; tracked in this session.</div>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">Shift actions</div>
+                <span class="badge">Session</span>
+              </div>
+              <div class="metric" id="metric-shifts">0</div>
+              <div class="muted">Trades / pickups / drops requested.</div>
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="section-title">How to use this dashboard</div>
+            <div class="section-body">
+              Use <strong>Attendance</strong> to clock in/out, <strong>Leave &amp; Absence</strong> to submit time-off,
+              <strong>Shift Management</strong> to trade or pick up shifts, and <strong>Reports</strong> (HR) to view
+              a quick summary. HR can approve or reject requests from the 🔔 notification bell.
+            </div>
+          </div>
+        </section>
+
+        <!-- ATTENDANCE -->
+        <section class="view hidden" data-view-id="attendance">
+          <h2 class="view-title">Attendance</h2>
+          <p class="view-subtitle">
+            Employees: clock in/out once per state. HR: view who arrived and left, with timestamps.
+          </p>
+
+          <div class="card">
+            <div id="attendance-entry-block">
+              <div class="section-title">Clock in / Clock out</div>
+              <form id="attendance-form">
+                <div class="form-row" style="margin-top: 6px;">
+                  <div class="field" style="flex: 0 0 auto;">
+                    <label class="field-label">
+                      <input type="radio" name="attendance-action" value="in" checked /> Clock in
+                    </label>
+                  </div>
+                  <div class="field" style="flex: 0 0 auto;">
+                    <label class="field-label">
+                      <input type="radio" name="attendance-action" value="out" /> Clock out
+                    </label>
+                  </div>
+                  <button type="submit" class="btn-small">Submit</button>
+                </div>
+              </form>
+            </div>
+
+
+            <!-- QR ATTENDANCE SECTION -->
+            <div class="section" id="qr-section" style="margin-top:10px;">
+              <div class="section-title">QR code attendance</div>
+              <div class="section-body">
+                In production this would use the camera to scan the QR on each staff ID badge.
+                For this prototype, type a staff username (for example <code>employee1</code>) and click
+                <strong>Simulate scan</strong>, or click <strong>Use camera scanner</strong> to see where a real scanner
+                would hook in.
+              </div>
+              <div class="form-row" style="margin-top:6px;">
+                <div class="field">
+                  <div class="field-label">Simulated QR value</div>
+                  <input id="qr-sim-input" type="text" class="input" placeholder="e.g. employee1" />
+                </div>
+                <div class="field" style="flex:0 0 auto; align-self:flex-end;">
+                  <button type="button" id="qr-sim-btn" class="btn-small">Simulate scan</button>
+                  <button type="button" id="qr-camera-btn" class="btn-small" style="margin-left:6px;">
+                    Use camera scanner
+                  </button>
+                </div>
+              </div>
+              <div class="section-body" id="qr-scan-status" style="margin-top:4px; font-size:11px;">
+                Waiting for scan…
+              </div>
+              <div class="section-body" id="qr-camera-container" style="margin-top:4px; font-size:11px;">
+                Camera scanner not started. In production, this area would show the live video preview from the QR
+                reader.
+              </div>
+            </div>
+            <!-- END QR ATTENDANCE SECTION -->
+
+            <table>
+              <thead id="attendance-head">
+                <!-- JS -->
+              </thead>
+              <tbody id="attendance-rows">
+                <!-- JS -->
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- LEAVE & ABSENCE -->
+        <section class="view hidden" data-view-id="leave">
+          <h2 class="view-title">Leave &amp; Absence</h2>
+          <p class="view-subtitle">Submit leave/absence requests for HR approval.</p>
+
+          <div class="card">
+            <div id="leave-form-section">
+              <div class="section-title">New leave request</div>
+              <form id="leave-form">
+                <div class="form-row" style="margin-top: 6px;">
+                  <div class="field">
+                    <div class="field-label">From</div>
+                    <input id="leave-from" type="date" class="input" />
+                  </div>
+                  <div class="field">
+                    <div class="field-label">To</div>
+                    <input id="leave-to" type="date" class="input" />
+                  </div>
+                </div>
+                <div class="field">
+                  <div class="field-label">Reason</div>
+                  <input id="leave-reason" type="text" class="input" placeholder="Vacation, sick, personal..." />
+                </div>
+                <button type="submit" class="btn-small">Submit leave request</button>
+              </form>
+            </div>
+
+            <table>
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Employee</th>
+                  <th>Period</th>
+                  <th>Reason</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="leave-rows">
+                <!-- JS -->
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- SHIFT MANAGEMENT -->
+        <section class="view hidden" data-view-id="shifts">
+          <h2 class="view-title">Shift Management</h2>
+          <p class="view-subtitle">
+            Employees: request trades or pickups. HR: assign hospital shifts and approve requests.
+          </p>
+
+          <div class="card">
+            <div class="section-title">Shift overview</div>
+            <div class="section-body">
+              Review assigned shifts and available hospital coverage, then submit or approve requests.
+            </div>
+
+            <div class="grid grid-2" style="margin-top: 8px;">
+              <div>
+                <div class="section-title">My assigned shifts</div>
+                <table>
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>Shift</th>
+                    </tr>
+                  </thead>
+                  <tbody id="my-shift-rows">
+                    <!-- JS -->
+                  </tbody>
+                </table>
+              </div>
+              <div>
+                <div class="section-title">Available hospital shifts</div>
+                <table>
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>Shift</th>
+                    </tr>
+                  </thead>
+                  <tbody id="available-shift-rows">
+                    <!-- JS -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- HR: create new shifts -->
+            <div class="section hidden" id="hr-create-shift-section" style="margin-top:10px;">
+              <div class="section-title">Create / assign hospital shifts</div>
+              <form id="hr-shift-form">
+                <div class="form-row" style="margin-top:6px;">
+                  <div class="field">
+                    <div class="field-label">Employee</div>
+                    <select id="hr-shift-employee" class="input">
+                      <!-- JS -->
+                    </select>
+                  </div>
+                  <div class="field">
+                    <div class="field-label">Shift description</div>
+                    <input id="hr-shift-desc" type="text" class="input"
+                      placeholder="e.g. Mon 07:00–15:00 – ICU Nurse" />
+                  </div>
+                </div>
+                <button type="submit" class="btn-small">Create shift</button>
+              </form>
+              <div class="section-body" style="margin-top:4px;">
+                Shifts created here will appear under the selected employee’s assigned shifts.
+              </div>
+            </div>
+
+            <!-- Employee: request shifts -->
+            <div class="section" id="new-shift-request-section" style="margin-top:10px;">
+              <div class="section-title">New shift request</div>
+              <form id="shift-form">
+                <div class="form-row" style="margin-top: 6px;">
+                  <div class="field">
+                    <div class="field-label">Action</div>
+                    <select id="shift-action" class="input">
+                      <option value="Trade">Trade shift</option>
+                      <option value="Pick up">Pick up available shift</option>
+                      <option value="Drop">Drop assigned shift</option>
+                    </select>
+                  </div>
+                  <div class="field">
+                    <div class="field-label">Select shift</div>
+                    <select id="shift-select" class="input">
+                      <!-- JS -->
+                    </select>
+                  </div>
+                </div>
+                <div class="field">
+                  <div class="field-label">Notes (optional)</div>
+                  <input id="shift-note" type="text" class="input"
+                    placeholder="e.g. Trade with Dr. Brown, clinic run" />
+                </div>
+                <button type="submit" class="btn-small">Submit shift request</button>
+              </form>
+            </div>
+
+            <div class="section" style="margin-top: 10px;">
+              <div class="section-title" id="shift-requests-heading">Your shift requests (this session)</div>
+              <table>
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Employee</th>
+                    <th>Type</th>
+                    <th>Details</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="shift-rows">
+                  <!-- JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- REPORTS -->
+        <section class="view hidden" data-view-id="reports">
+          <h2 class="view-title">Summary &amp; Reports</h2>
+          <p class="view-subtitle">
+            High-level overview of attendance, leave and shifts for this session. Intended for HR/Admin.
+          </p>
+
+          <div class="grid grid-2">
+            <div class="card">
+              <div class="section-title">Session summary</div>
+              <div class="section-body" id="report-summary" style="margin-top: 4px;">
+                No data yet.
+              </div>
+              <div class="chips">
+                <div class="chip" id="chip-attendance">Attendance: 0</div>
+                <div class="chip" id="chip-leave">Leave: 0</div>
+                <div class="chip" id="chip-shifts">Shifts: 0</div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="section-title">Tips for HR</div>
+              <div class="section-body">
+                Use the <strong>🔔 notification bell</strong> to approve or reject new requests. Once handled, status
+                is updated in <strong>Leave &amp; Absence</strong> and <strong>Shift Management</strong>, and these
+                numbers refresh here automatically.
+              </div>
+            </div>
+          </div>
+
+          <!-- Employee-specific report generator -->
+          <div class="section" style="margin-top:10px;">
+            <div class="card">
+              <div class="section-title">Generate employee report</div>
+              <form id="employee-report-form" style="margin-top:6px;">
+                <div class="form-row">
+                  <div class="field">
+                    <div class="field-label">Select employee</div>
+                    <select id="employee-report-select" class="input">
+                      <!-- JS -->
+                    </select>
+                  </div>
+                  <div class="field" style="flex:0 0 auto; align-self:flex-end;">
+                    <button type="submit" class="btn-small">Generate report</button>
+                  </div>
+                </div>
+              </form>
+              <div class="section-body" id="employee-report-output" style="margin-top:6px;">
+                Select an employee to view a summary of their attendance, leave and shift activity for this session.
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </section>
+  </div>
+
+  <script>
+    (function () {
+      const loginScreen = document.getElementById("login-screen");
+      const dashboardScreen = document.getElementById("dashboard-screen");
+      const loginForm = document.getElementById("login-form");
+      const loginError = document.getElementById("login-error");
+      const roleSelect = document.getElementById("role");
+      const userRoleLabel = document.getElementById("user-role-label");
+      const userNameLabel = document.getElementById("user-name-label");
+
+      const loginShell = document.getElementById("login-shell");
+      const toggleEmployee = document.getElementById("toggle-employee");
+      const toggleHr = document.getElementById("toggle-hr");
+      const loginMainHeading = document.getElementById("login-main-heading");
+      const loginMainSub = document.getElementById("login-main-sub");
+      const signInLabel = document.getElementById("sign-in-label");
+      const loginHintEmployee = document.getElementById("login-hint-employee");
+      const loginHintHr = document.getElementById("login-hint-hr");
+      const leftCopyEmployee = document.getElementById("left-copy-employee");
+      const leftCopyHr = document.getElementById("left-copy-hr");
+
+      const navLinks = document.querySelectorAll(".nav-link");
+      const views = document.querySelectorAll(".view");
+
+      const logoutBtn = document.getElementById("logout-btn");
+
+      // LOGOUT HANDLER
+      logoutBtn.addEventListener("click", function () {
+        // Clear user session data
+        currentUser = null;
+        currentRole = null;
+
+        // Hide dashboard, show login
+        dashboardScreen.classList.add("hidden");
+        loginScreen.classList.remove("hidden");
+
+        // Reset form + UI
+        loginForm.reset();
+        loginError.classList.add("hidden");
+
+        // Reset role toggle to employee by default
+        switchRole("employee");
+
+        // Reset displayed user labels
+        userRoleLabel.textContent = "Employee";
+        userNameLabel.textContent = "-";
+      });
+
+      const notifWrapper = document.getElementById("notif-wrapper");
+      const notifBtn = document.getElementById("notif-btn");
+      const notifCount = document.getElementById("notif-count");
+      const notifDropdown = document.getElementById("notif-dropdown");
+      const notifList = document.getElementById("notif-list");
+      const notifTitle = document.getElementById("notif-title");
+
+      const togglePasswordBtn = document.getElementById("toggle-password");
+      const passwordInput = document.getElementById("password");
+
+      // Metrics + report chips
+      const metricAttendance = document.getElementById("metric-attendance");
+      const metricLeave = document.getElementById("metric-leave");
+      const metricShifts = document.getElementById("metric-shifts");
+      const reportSummary = document.getElementById("report-summary");
+      const chipAttendance = document.getElementById("chip-attendance");
+      const chipLeave = document.getElementById("chip-leave");
+      const chipShifts = document.getElementById("chip-shifts");
+
+
+
+      // Attendance
+      const attendanceEntryBlock = document.getElementById("attendance-entry-block");
+      const attendanceForm = document.getElementById("attendance-form");
+      const attendanceHead = document.getElementById("attendance-head");
+      const attendanceRows = document.getElementById("attendance-rows");
+      const attendanceLog = [];
+
+      // Load attendance logs for current user / role
+      async function loadAttendanceForCurrentUser() {
+        attendanceLog.length = 0;
+
+        if (!currentUser || !currentRole) {
+          renderAttendance();
+          return;
+        }
+
+        try {
+          let url;
+
+          if (currentRole === "employee") {
+            // Fetch only this user's logs
+            if (!currentUser.dbId) {
+              console.warn("No dbId on currentUser; cannot load attendance");
+              renderAttendance();
+              return;
+            }
+            url = `/api/attendance/user/${currentUser.dbId}`;
+          } else if (currentRole === "hr") {
+            // HR sees all recent logs (with joined user info)
+            url = "/api/attendance/recent";
+          } else {
+            renderAttendance();
+            return;
+          }
+
+          const res = await fetch(url);
+          if (!res.ok) {
+            throw new Error("Failed to fetch attendance");
+          }
+
+          const data = await res.json();
+          const logs = data.logs || [];
+
+          logs.forEach((log) => {
+            // Map DB row -> frontend format used by renderAttendance()
+            if (currentRole === "employee") {
+              // Employee view: only their own logs
+              attendanceLog.push({
+                userId: currentUser.dbId,
+                user: currentUser.username, // staff_id / username
+                displayName: currentUser.displayName,
+                type:
+                  log.event_type &&
+                    log.event_type.toUpperCase() === "OUT"
+                    ? "out"
+                    : "in",
+                time: log.recorded_at
+                  ? new Date(log.recorded_at).toLocaleString()
+                  : ""
+              });
+            } else {
+              // HR view: show proper employee name (requires backend join on users)
+              const fullName = [log.first_name, log.last_name].filter(Boolean).join(" ");
+
+              attendanceLog.push({
+                userId: log.user_id,
+                user: log.user_id, // keep if you still want the id
+                displayName: fullName || `User #${log.user_id}`,
+                type:
+                  log.event_type &&
+                    log.event_type.toUpperCase() === "OUT"
+                    ? "out"
+                    : "in",
+                time: log.recorded_at
+                  ? new Date(log.recorded_at).toLocaleString()
+                  : ""
+              });
+            }
+          });
+
+          renderAttendance();
+        } catch (err) {
+          console.error("Failed to load attendance:", err);
+          renderAttendance(); // At least render empty state
+        }
+      }
+
+      // Save attendance to server
+      async function saveAttendanceToServer({ userDbId, eventType, source = "WEB_FORM", qrValue = null }) {
+        const res = await fetch("/api/attendance", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            userId: userDbId,      // numeric users.id
+            action: eventType,     // "in" or "out"
+            source: source,
+            qrValue: qrValue
+          })
+        });
+
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          throw new Error(errData.message || "Failed to save attendance");
+        }
+
+        const data = await res.json(); // { log: { ... } }
+        return data.log;
+      }
+
+
+
+      // QR attendance elements
+      const qrSimInput = document.getElementById("qr-sim-input");
+      const qrSimBtn = document.getElementById("qr-sim-btn");
+      const qrCameraBtn = document.getElementById("qr-camera-btn");
+      const qrScanStatus = document.getElementById("qr-scan-status");
+      const qrCameraContainer = document.getElementById("qr-camera-container");
+
+
+      // Leave section
+
+      const leaveFormSection = document.getElementById("leave-form-section");
+      const leaveForm = document.getElementById("leave-form");
+      const leaveRows = document.getElementById("leave-rows");
+      const leaveRequests = [];
+
+      // Load leave requests for current user / role
+      async function loadLeaveForCurrentUser() {
+        // Clear current in-memory list
+        leaveRequests.length = 0;
+
+        if (!currentUser || !currentRole) {
+          renderLeave();
+          return;
+        }
+
+        try {
+          let url;
+
+          if (currentRole === "employee") {
+            // Employee: only see their own leave
+            if (!currentUser.dbId) {
+              console.warn("No dbId on currentUser; cannot load leave");
+              renderLeave();
+              return;
+            }
+            url = `/api/leave/user/${currentUser.dbId}`;
+          } else if (currentRole === "hr") {
+            // HR: see all leave requests
+            url = "/api/leave";
+          } else {
+            renderLeave();
+            return;
+          }
+
+          const res = await fetch(url);
+          if (!res.ok) {
+            throw new Error("Failed to fetch leave requests");
+          }
+
+          const data = await res.json();
+          const leaves = data.leaves || [];
+
+          leaves.forEach((lv) => {
+            // DB status is PENDING / APPROVED / REJECTED
+            const rawStatus = (lv.status || "PENDING").toUpperCase();
+            let baseStatus;
+
+            if (rawStatus === "APPROVED") baseStatus = "Approved";
+            else if (rawStatus === "REJECTED") baseStatus = "Rejected";
+            else baseStatus = "Pending";
+
+            const base = {
+              id: lv.id,
+              userId: lv.user_id,
+              from: lv.from_date,         // raw date string from DB
+              to: lv.to_date,             // raw date string from DB
+              reason: lv.reason,
+              status: baseStatus,         // "Pending" | "Approved" | "Rejected"
+              submittedAt: lv.submitted_at || null,
+            };
+
+            if (currentRole === "employee") {
+              // For employees, we know their name from login
+              base.displayName = currentUser.displayName;
+              base.username = currentUser.username;
+            } else if (currentRole === "hr") {
+              // For HR, use name from backend join on users:
+              // employee_first_name / employee_last_name
+              const fullName = [
+                lv.employee_first_name,
+                lv.employee_last_name
+              ].filter(Boolean).join(" ");
+
+              base.displayName = fullName || `User #${lv.user_id}`;
+              // staff id 
+              base.username = lv.employee_staff_id || null;
+            }
+
+            leaveRequests.push(base);
+          });
+
+          renderLeave();
+        } catch (err) {
+          console.error("Failed to load leave requests:", err);
+          renderLeave(); // render empty state at least
+        }
+      }
+
+      // Shifts – tables + forms. section
+
+      const myShiftRows = document.getElementById("my-shift-rows");
+      const availableShiftRows = document.getElementById("available-shift-rows");
+      const shiftForm = document.getElementById("shift-form");
+      const shiftRows = document.getElementById("shift-rows");
+      const shiftActionSelect = document.getElementById("shift-action");
+      const shiftSelect = document.getElementById("shift-select");
+      const shiftNote = document.getElementById("shift-note");
+      const newShiftRequestSection = document.getElementById("new-shift-request-section");
+      const shiftRequestsHeading = document.getElementById("shift-requests-heading");
+      const shiftRequests = [];
+
+
+      const assignedShifts = [];   // shifts assigned to current user (from /api/shifts/user/:id)
+      const availableShifts = [];  // shifts with status = 'AVAILABLE' (from /api/shifts/available)
+      const hrEmployees = [];
+
+      // Load shift requests for current user / role 
+
+      async function loadShiftRequestsForCurrentUser() {
+        // Clear in-memory list
+        shiftRequests.length = 0;
+
+        if (!currentUser || !currentRole) {
+          renderShifts();
+          updateReports();
+          return;
+        }
+
+        try {
+          let url;
+
+          if (currentRole === "employee") {
+            if (!currentUser.dbId) {
+              console.warn("No dbId on currentUser; cannot load shift requests");
+              renderShifts();
+              updateReports();
+              return;
+            }
+            url = `/api/shift-requests/user/${currentUser.dbId}`;
+          } else if (currentRole === "hr") {
+            url = "/api/shift-requests";
+          } else {
+            renderShifts();
+            updateReports();
+            return;
+          }
+
+          const res = await fetch(url);
+          if (!res.ok) {
+            throw new Error("Failed to fetch shift requests");
+          }
+
+          const data = await res.json();
+          const rows = data.shiftRequests || [];
+
+          rows.forEach((sr) => {
+            // Normalise status
+            const rawStatus = (sr.status || "PENDING").toUpperCase();
+            let baseStatus;
+            if (rawStatus === "APPROVED") baseStatus = "Approved";
+            else if (rawStatus === "REJECTED") baseStatus = "Rejected";
+            else baseStatus = "Pending";
+
+            // Map DB request_type -> UI label
+            let typeLabel;
+            switch ((sr.request_type || "").toUpperCase()) {
+              case "PICK_UP":
+                typeLabel = "Pick up";
+                break;
+              case "DROP":
+                typeLabel = "Drop";
+                break;
+              default:
+                typeLabel = "Trade";
+            }
+
+            const base = {
+              id: sr.id,
+              userId: sr.user_id,
+              shiftId: sr.shift_id,
+              type: typeLabel,
+              note: sr.note,
+              status: baseStatus,
+              source: sr.source,
+              createdAt: sr.created_at,
+            };
+
+            if (currentRole === "employee") {
+              // current user’s own view
+              base.user = currentUser.username;
+              base.userDisplayName = currentUser.displayName;
+            } else if (currentRole === "hr") {
+              // HR view – use joined employee info if backend provides it
+              const fullName = [
+                sr.employee_first_name,
+                sr.employee_last_name,
+              ].filter(Boolean).join(" ");
+
+              base.userDisplayName = fullName || `User #${sr.user_id}`;
+              base.user = sr.employee_staff_id || null;
+            }
+
+            // Prefer label from joined shift if backend provides it
+            base.shiftLabel = sr.shift_description || `Shift #${sr.shift_id}`;
+
+            shiftRequests.push(base);
+          });
+
+          renderShifts();
+          updateReports();
+        } catch (err) {
+          console.error("Failed to load shift requests:", err);
+          renderShifts();
+          updateReports();
+        }
+      }
+
+      // Load shifts (assigned + available) for current user / role
+
+      async function loadShiftsForCurrentUser() {
+        // clear current data
+        assignedShifts.length = 0;
+        availableShifts.length = 0;
+
+        if (!currentUser || !currentRole) {
+          renderShiftPools();
+          renderShifts();
+          return;
+        }
+
+        try {
+          // Employee's own assigned shifts
+          if (currentRole === "employee" && currentUser.dbId) {
+            const resAssigned = await fetch(`/api/shifts/user/${currentUser.dbId}`);
+            if (!resAssigned.ok) {
+              throw new Error("Failed to fetch user shifts");
+            }
+            const dataAssigned = await resAssigned.json();
+            const shifts = dataAssigned.shifts || [];
+
+            shifts.forEach((s) => {
+              assignedShifts.push({
+                id: s.id,
+                label: s.description || `Shift #${s.id}`,
+              });
+            });
+          }
+
+          // Available shifts (status = AVAILABLE) – same list for both roles
+          const resAvail = await fetch("/api/shifts/available");
+          if (!resAvail.ok) {
+            throw new Error("Failed to fetch available shifts");
+          }
+          const dataAvail = await resAvail.json();
+          const avail = dataAvail.shifts || [];
+
+          avail.forEach((s) => {
+            availableShifts.push({
+              id: s.id,
+              label: s.description || `Shift #${s.id}`,
+            });
+          });
+
+          renderShiftPools();
+          populateShiftOptions();
+          renderShifts();
+        } catch (err) {
+          console.error("Failed to load shifts:", err);
+          renderShiftPools();
+          renderShifts();
+        }
+      }
+
+
+
+
+
+      // HR shift creation
+
+      const hrCreateShiftSection = document.getElementById("hr-create-shift-section");
+      const hrShiftForm = document.getElementById("hr-shift-form");
+      const hrShiftEmployee = document.getElementById("hr-shift-employee");
+      const hrShiftDesc = document.getElementById("hr-shift-desc");
+
+      // Employee report
+
+      const employeeReportForm = document.getElementById("employee-report-form");
+      const employeeReportSelect = document.getElementById("employee-report-select");
+      const employeeReportOutput = document.getElementById("employee-report-output");
+
+      // Per-employee clocked-in status
+
+      const employeeStatus = {}; // { username: { clockedIn: bool } }
+
+      function getEmployeeStatus(username) {
+        if (!employeeStatus[username]) {
+          employeeStatus[username] = { clockedIn: false };
+        }
+        return employeeStatus[username];
+      }
+
+      function updateAttendanceControls() {
+        const inRadio = document.querySelector('input[name="attendance-action"][value="in"]');
+        const outRadio = document.querySelector('input[name="attendance-action"][value="out"]');
+        if (!inRadio || !outRadio) return;
+
+        if (!currentUser || currentRole !== "employee") {
+          inRadio.disabled = false;
+          outRadio.disabled = true;
+          inRadio.checked = true;
+          return;
+        }
+
+        const status = getEmployeeStatus(currentUser.username);
+
+        if (status.clockedIn) {
+          inRadio.disabled = true;
+          outRadio.disabled = false;
+          outRadio.checked = true;
+        } else {
+          inRadio.disabled = false;
+          outRadio.disabled = true;
+          inRadio.checked = true;
+        }
+      }
+
+      // Notifications: { text, kind, indexRef, handled, targetRole, targetUser, seen }
+      const notifications = [];
+
+      let currentRole = null; // "employee" or "hr"
+      let currentUser = null; // { role, username, displayName }
+
+      function switchRole(role) {
+        roleSelect.value = role;
+        loginShell.dataset.role = role;
+
+        if (role === "employee") {
+          toggleEmployee.classList.add("active");
+          toggleHr.classList.remove("active");
+          loginMainHeading.textContent = "Employee sign in";
+          loginMainSub.textContent =
+            "Use your staff ID and password to access your attendance and shift information.";
+          signInLabel.textContent = "Sign in as Employee";
+          loginHintEmployee.classList.remove("hidden");
+          loginHintHr.classList.add("hidden");
+          leftCopyEmployee.classList.remove("hidden");
+          leftCopyHr.classList.add("hidden");
+        } else {
+          toggleHr.classList.add("active");
+          toggleEmployee.classList.remove("active");
+          loginMainHeading.textContent = "HR / Manager sign in";
+          loginMainSub.textContent =
+            "Access attendance exceptions, approve leave and publish official schedules.";
+          signInLabel.textContent = "Sign in as HR / Manager";
+          loginHintEmployee.classList.add("hidden");
+          loginHintHr.classList.remove("hidden");
+          leftCopyEmployee.classList.add("hidden");
+          leftCopyHr.classList.remove("hidden");
+        }
+      }
+
+      toggleEmployee.addEventListener("click", function (e) {
+        e.preventDefault();
+        switchRole("employee");
+      });
+
+      toggleHr.addEventListener("click", function (e) {
+        e.preventDefault();
+        switchRole("hr");
+      });
+
+      // Password eye toggle
+      togglePasswordBtn.addEventListener("click", function () {
+        const isPwd = passwordInput.type === "password";
+        passwordInput.type = isPwd ? "text" : "password";
+        togglePasswordBtn.textContent = isPwd ? "🙈" : "👁";
+        togglePasswordBtn.setAttribute("aria-label", isPwd ? "Hide password" : "Show password");
+      });
+
+      // Navigation handler
+      function showView(viewName) {
+        // Switch visible section
+        views.forEach((v) => v.classList.add("hidden"));
+        const target = document.querySelector('[data-view-id="' + viewName + '"]');
+        if (target) target.classList.remove("hidden");
+
+        // Update active nav pill
+        navLinks.forEach((link) => {
+          if (link.dataset.target === viewName) {
+            link.classList.add("active");
+          } else {
+            link.classList.remove("active");
+          }
+        });
+
+        // Ensure data is loaded from the backend for each view
+        if (!currentUser || !currentRole) return;
+
+        if (viewName === "attendance") {
+          // Reload attendance from DB
+          loadAttendanceForCurrentUser();
+        } else if (viewName === "leave") {
+          // Reload leave from DB
+          loadLeaveForCurrentUser();
+        } else if (viewName === "shifts") {
+          // Reload shifts + shift requests from DB
+          loadShiftsForCurrentUser();
+          loadShiftRequestsForCurrentUser();
+        } else if (viewName === "reports") {
+          // For reports, make sure *all* DB-backed data is fresh
+          Promise.all([
+            loadAttendanceForCurrentUser(),
+            loadLeaveForCurrentUser(),
+            loadShiftsForCurrentUser(),
+            loadShiftRequestsForCurrentUser(),
+          ])
+            .then(() => {
+              // Now recompute counts using DB data
+              updateMetrics();
+              updateReports();
+            })
+            .catch((err) => {
+              console.error("Failed to refresh data for reports:", err);
+              // Still try to update with whatever we have
+              updateMetrics();
+              updateReports();
+            });
+        }
+      }
+      function getMyShifts() {
+        if (!currentUser || currentRole !== "employee") return [];
+        return assignedShifts;
+      }
+
+      function getCounts() {
+        if (!currentUser || currentRole === "hr") {
+          return {
+            attendance: attendanceLog.length,
+            leave: leaveRequests.length,
+            shifts: shiftRequests.length
+          };
+        }
+        const u = currentUser.username;
+        return {
+          attendance: attendanceLog.filter((e) => e.user === u).length,
+          leave: leaveRequests.filter((e) => e.user === u).length,
+          shifts: shiftRequests.filter((e) => e.user === u).length
+        };
+      }
+
+      function updateMetrics() {
+        const c = getCounts();
+        metricAttendance.textContent = c.attendance.toString();
+        metricLeave.textContent = c.leave.toString();
+        metricShifts.textContent = c.shifts.toString();
+      }
+
+      function updateReports() {
+        const a = attendanceLog.length;
+        const l = leaveRequests.length;
+        const s = shiftRequests.length;
+
+        reportSummary.textContent =
+          "Total attendance records: " +
+          a +
+          " | Leave requests: " +
+          l +
+          " | Shift requests: " +
+          s +
+          " (session only).";
+
+        chipAttendance.textContent = "Attendance: " + a;
+        chipLeave.textContent = "Leave: " + l;
+        chipShifts.textContent = "Shifts: " + s;
+      }
+
+      // Status mapping for Employee vs HR
+      function formatStatus(baseStatus) {
+        let label = baseStatus;
+        if (currentRole === "employee") {
+          if (baseStatus === "Pending") label = "Submitted";
+          else if (baseStatus === "Rejected") label = "Denied";
+        }
+        let cls = "";
+        if (baseStatus === "Pending") cls = "status-pending";
+        else if (baseStatus === "Approved") cls = "status-approved";
+        else if (baseStatus === "Rejected") cls = "status-rejected";
+        return { label, cls };
+      }
+
+
+      // Render functions for tables
+      function renderAttendance() {
+        attendanceHead.innerHTML = "";
+        attendanceRows.innerHTML = "";
+
+        const headRow = document.createElement("tr");
+        const thIndex = document.createElement("th");
+        thIndex.textContent = "#";
+        headRow.appendChild(thIndex);
+
+        if (currentRole === "hr") {
+          const thEmp = document.createElement("th");
+          thEmp.textContent = "Employee";
+          headRow.appendChild(thEmp);
+        }
+
+        const thAction = document.createElement("th");
+        thAction.textContent = "Action";
+        const thTime = document.createElement("th");
+        thTime.textContent = "Time";
+
+        headRow.appendChild(thAction);
+        headRow.appendChild(thTime);
+        attendanceHead.appendChild(headRow);
+
+        const rows =
+          currentRole === "employee" && currentUser
+            ? attendanceLog.filter((entry) => entry.user === currentUser.username)
+            : attendanceLog;
+
+        rows.forEach((entry, index) => {
+          const tr = document.createElement("tr");
+          const tdIndex = document.createElement("td");
+          tdIndex.textContent = (index + 1).toString();
+          tr.appendChild(tdIndex);
+
+          if (currentRole === "hr") {
+            const tdEmp = document.createElement("td");
+            tdEmp.textContent = entry.displayName || `User #${entry.userId}` || (entry.user || "-");
+            tr.appendChild(tdEmp);
+          }
+          const tdAction = document.createElement("td");
+          const tdTime = document.createElement("td");
+
+          tdAction.textContent = entry.type === "in" ? "Clock in" : "Clock out";
+          tdTime.textContent = entry.time;
+
+          tr.appendChild(tdAction);
+          tr.appendChild(tdTime);
+          attendanceRows.appendChild(tr);
+        });
+        updateMetrics();
+        updateReports();
+      }
+
+
+      // HR-only: update leave status via API and refresh UI
+
+      async function handleLeaveAction(index, newStatus) {
+        const req = leaveRequests[index];
+        if (!req) return;
+        if (!currentUser || currentRole !== "hr") return;
+
+        const leaveId = req.id;
+        if (!leaveId) {
+          console.error("Missing leave id on request:", req);
+          return;
+        }
+
+        try {
+          const res = await fetch(`/api/leave/${leaveId}/status`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              status: newStatus,          // "APPROVED" or "REJECTED" or "PENDING"
+              approverId: currentUser.dbId
+            })
+          });
+
+          if (!res.ok) {
+            const errData = await res.json().catch(() => ({}));
+            throw new Error(errData.message || "Failed to update leave status");
+          }
+
+          const data = await res.json();
+          const updated = data.leave || {};
+
+          // Normalise status to our base statuses used in the UI
+          const rawStatus = (updated.status || newStatus || "PENDING").toUpperCase();
+          let baseStatus;
+          if (rawStatus === "APPROVED") baseStatus = "Approved";
+          else if (rawStatus === "REJECTED") baseStatus = "Rejected";
+          else baseStatus = "Pending";
+
+          req.status = baseStatus;
+          req.approvedBy = updated.approved_by || null;
+          req.approvedAt = updated.approved_at || null;
+
+          // Optional: notify employee (if we know their username / staff id)
+          if (req.username) {
+            const fromDate = (req.from || req.from_date || "").toString().split("T")[0];
+            const toDate = (req.to || req.to_date || "").toString().split("T")[0];
+
+            addNotification({
+              text:
+                "Your leave request (" +
+                fromDate +
+                " → " +
+                toDate +
+                ") was " +
+                baseStatus,
+              kind: "leave",
+              indexRef: index,
+              targetRole: "employee",
+              targetUser: req.username
+            });
+          }
+
+          renderLeave();
+          renderNotifications();
+        } catch (err) {
+          console.error("handleLeaveAction error:", err);
+          alert("Could not update leave status. Please try again.");
+        }
+      }
+
+      // Close any open leave action menus when clicking outside
+      document.addEventListener("click", function () {
+        const menus = document.querySelectorAll(".leave-action-menu");
+        menus.forEach((m) => m.classList.add("hidden"));
+      });
+
+
+      // Render leave requests
+      function renderLeave() {
+        leaveRows.innerHTML = "";
+
+        const rows = leaveRequests;
+
+        rows.forEach((req, index) => {
+          const tr = document.createElement("tr");
+          const tdIndex = document.createElement("td");
+          const tdEmp = document.createElement("td");
+          const tdPeriod = document.createElement("td");
+          const tdReason = document.createElement("td");
+          const tdStatus = document.createElement("td");
+
+          tdIndex.textContent = (index + 1).toString();
+
+          // displayName for both Employee & HR
+          const name =
+            req.displayName ||
+            (req.userId ? `User #${req.userId}` : req.username || "-");
+          tdEmp.textContent = name;
+
+          const fromDate = (req.from_date || req.from || "").toString().split("T")[0];
+          const toDate = (req.to_date || req.to || "").toString().split("T")[0];
+
+          tdPeriod.textContent = `${fromDate} → ${toDate}`;
+
+          tdReason.textContent = req.reason;
+
+          const statusInfo = formatStatus(req.status); // "Pending" | "Approved" | "Rejected"
+          const statusPill = document.createElement("span");
+          statusPill.classList.add("pill-status");
+          if (statusInfo.cls) statusPill.classList.add(statusInfo.cls);
+          statusPill.textContent = statusInfo.label;
+
+          if (currentRole === "hr") {
+            // HR sees inline actions (Approve / Reject / Reset) next to the status pill
+            const wrapper = document.createElement("div");
+            wrapper.classList.add("leave-actions-wrapper");
+            wrapper.addEventListener("click", function (evt) {
+              // prevent clicks inside from triggering the global close
+              evt.stopPropagation();
+            });
+
+            wrapper.appendChild(statusPill);
+
+            const toggleBtn = document.createElement("button");
+            toggleBtn.type = "button";
+            toggleBtn.classList.add("leave-action-toggle");
+            toggleBtn.textContent = "⋯";
+
+            const menu = document.createElement("div");
+            menu.classList.add("leave-action-menu", "hidden");
+
+            const approveBtn = document.createElement("button");
+            approveBtn.textContent = "Approve";
+            approveBtn.addEventListener("click", function (evt) {
+              evt.stopPropagation();
+              menu.classList.add("hidden");
+              handleLeaveAction(index, "APPROVED");
+            });
+
+            const rejectBtn = document.createElement("button");
+            rejectBtn.classList.add("leave-action-reject");
+            rejectBtn.textContent = "Reject";
+            rejectBtn.addEventListener("click", function (evt) {
+              evt.stopPropagation();
+              menu.classList.add("hidden");
+              handleLeaveAction(index, "REJECTED");
+            });
+
+            const resetBtn = document.createElement("button");
+            resetBtn.textContent = "Reset to pending";
+            resetBtn.addEventListener("click", function (evt) {
+              evt.stopPropagation();
+              menu.classList.add("hidden");
+              handleLeaveAction(index, "PENDING");
+            });
+
+            menu.appendChild(approveBtn);
+            menu.appendChild(rejectBtn);
+            menu.appendChild(resetBtn);
+
+            toggleBtn.addEventListener("click", function (evt) {
+              evt.stopPropagation();
+              const isHidden = menu.classList.contains("hidden");
+              // close other menus
+              const menus = document.querySelectorAll(".leave-action-menu");
+              menus.forEach((m) => m.classList.add("hidden"));
+              if (isHidden) {
+                menu.classList.remove("hidden");
+              }
+            });
+
+            wrapper.appendChild(toggleBtn);
+            wrapper.appendChild(menu);
+
+            tdStatus.appendChild(wrapper);
+          } else {
+            // Employee view: just show the pill
+            tdStatus.appendChild(statusPill);
+          }
+
+          tr.appendChild(tdIndex);
+          tr.appendChild(tdEmp);
+          tr.appendChild(tdPeriod);
+          tr.appendChild(tdReason);
+          tr.appendChild(tdStatus);
+
+          leaveRows.appendChild(tr);
+        });
+
+        updateMetrics();
+        updateReports();
+      }
+
+      // Render shift pools: "My assigned shifts" and "Available shifts"
+
+      function renderShiftPools() {
+        // My assigned shifts
+        myShiftRows.innerHTML = "";
+        const myList = getMyShifts();
+
+        if (!currentUser || currentRole !== "employee") {
+          const tr = document.createElement("tr");
+          const td = document.createElement("td");
+          td.colSpan = 2;
+          td.textContent = "Log in as an Employee to see assigned shifts.";
+          tr.appendChild(td);
+          myShiftRows.appendChild(tr);
+        } else if (myList.length === 0) {
+          const tr = document.createElement("tr");
+          const td = document.createElement("td");
+          td.colSpan = 2;
+          td.textContent = "No assigned shifts configured.";
+          tr.appendChild(td);
+          myShiftRows.appendChild(tr);
+        } else {
+          myList.forEach((s, index) => {
+            const tr = document.createElement("tr");
+            const tdIndex = document.createElement("td");
+            const tdLabel = document.createElement("td");
+            tdIndex.textContent = (index + 1).toString();
+            tdLabel.textContent = s.label;
+            tr.appendChild(tdIndex);
+            tr.appendChild(tdLabel);
+            myShiftRows.appendChild(tr);
+          });
+        }
+
+        // Available shifts (same for everyone)
+        availableShiftRows.innerHTML = "";
+        if (availableShifts.length === 0) {
+          const tr = document.createElement("tr");
+          const td = document.createElement("td");
+          td.colSpan = 2;
+          td.textContent = "No available shifts at the moment.";
+          tr.appendChild(td);
+          availableShiftRows.appendChild(tr);
+        } else {
+          availableShifts.forEach((s, index) => {
+            const tr = document.createElement("tr");
+            const tdIndex = document.createElement("td");
+            const tdLabel = document.createElement("td");
+            tdIndex.textContent = (index + 1).toString();
+            tdLabel.textContent = s.label;
+            tr.appendChild(tdIndex);
+            tr.appendChild(tdLabel);
+            availableShiftRows.appendChild(tr);
+          });
+        }
+      }
+
+      function populateShiftOptions() {
+        const action = shiftActionSelect.value;
+        let list = getMyShifts();
+        if (action === "Pick up") {
+          list = availableShifts;
+        }
+
+        shiftSelect.innerHTML = "";
+        const placeholder = document.createElement("option");
+        placeholder.value = "";
+        placeholder.textContent = "-- Select shift --";
+        shiftSelect.appendChild(placeholder);
+
+        list.forEach((s) => {
+          const opt = document.createElement("option");
+          opt.value = s.id;
+          opt.textContent = s.label;
+          shiftSelect.appendChild(opt);
+        });
+      }
+
+      function renderNotifications() {
+        let visible = [];
+        if (!currentRole) {
+          visible = [];
+        } else if (currentRole === "hr") {
+          visible = notifications.filter((n) => n.targetRole === "hr");
+          notifTitle.textContent = "Pending approvals";
+        } else if (currentRole === "employee" && currentUser) {
+          visible = notifications.filter(
+            (n) => n.targetRole === "employee" && n.targetUser === currentUser.username
+          );
+          notifTitle.textContent = "Updates from HR";
+        }
+
+        let pending = [];
+        if (currentRole === "hr") {
+          pending = visible.filter((n) => !n.handled);
+        } else if (currentRole === "employee") {
+          pending = visible.filter((n) => !n.seen);
+        }
+
+        if (pending.length === 0) {
+          notifCount.classList.add("hidden");
+        } else {
+          notifCount.classList.remove("hidden");
+        }
+        notifCount.textContent = pending.length.toString();
+
+        notifList.innerHTML = "";
+        if (visible.length === 0) {
+          const li = document.createElement("li");
+          li.textContent = "No notifications yet.";
+          notifList.appendChild(li);
+          return;
+        }
+
+        visible.forEach((n) => {
+          const li = document.createElement("li");
+
+          const textSpan = document.createElement("span");
+          textSpan.textContent = n.text;
+          li.appendChild(textSpan);
+
+          if (currentRole === "employee") {
+            if (n.seen) {
+              const s = document.createElement("span");
+              s.classList.add("muted");
+              s.textContent = "Seen";
+              li.appendChild(s);
+            }
+          }
+
+          if (!n.handled && currentRole === "hr" && n.targetRole === "hr") {
+            const actions = document.createElement("div");
+            actions.classList.add("notif-actions");
+
+            const approveBtn = document.createElement("button");
+            approveBtn.classList.add("notif-approve");
+            approveBtn.textContent = "Approve";
+            const globalIndex = notifications.indexOf(n);
+            approveBtn.addEventListener("click", function () {
+              handleNotification(globalIndex, true);
+            });
+
+            const rejectBtn = document.createElement("button");
+            rejectBtn.classList.add("notif-reject");
+            rejectBtn.textContent = "Reject";
+            rejectBtn.addEventListener("click", function () {
+              handleNotification(globalIndex, false);
+            });
+
+            actions.appendChild(approveBtn);
+            actions.appendChild(rejectBtn);
+            li.appendChild(actions);
+          } else if (n.handled && currentRole === "hr" && n.targetRole === "hr") {
+            const status = document.createElement("span");
+            status.classList.add("muted");
+            status.textContent = "Already handled";
+            li.appendChild(status);
+          }
+
+          notifList.appendChild(li);
+        });
+      }
+
+      function addNotification(payload) {
+        notifications.push({
+          text: payload.text,
+          kind: payload.kind,
+          indexRef: payload.indexRef != null ? payload.indexRef : null,
+          handled: payload.handled || false,
+          targetRole: payload.targetRole || "hr",
+          targetUser: payload.targetUser || null,
+          seen: false,
+        });
+        renderNotifications();
+      }
+
+      function removeShiftFromPool(pool, shiftId) {
+        const idx = pool.findIndex((s) => s.id === shiftId);
+        if (idx === -1) return null;
+        const [removed] = pool.splice(idx, 1);
+        return removed;
+      }
+
+      function handleNotification(notifIndex, approved) {
+        const notif = notifications[notifIndex];
+        if (!notif || notif.targetRole !== "hr") return;
+
+        // Mark this notification as handled (for HR view)
+        notif.handled = true;
+
+        if (notif.kind === "leave") {
+          // main leave handler so DB + UI stay in sync
+          const newStatus = approved ? "APPROVED" : "REJECTED";
+          // This will:
+          // - PATCH /api/leave/:id/status
+          // - update leaveRequests[index]
+          // - send a notification to the employee
+          // - re-render leave + notifications
+          handleLeaveAction(notif.indexRef, newStatus);
+
+        } else if (notif.kind === "shift") {
+          // Reuse the same DB-backed handler that the inline table actions use
+          const newStatus = approved ? "APPROVED" : "REJECTED";
+          handleShiftAction(notif.indexRef, newStatus);
+        }
+
+        // Final refresh of the bell UI
+        renderNotifications();
+      }
+
+
+      // Load employees from backend for HR shift dropdown + reports
+
+      async function loadEmployeesForHr() {
+        if (!currentUser || currentRole !== "hr") return;
+
+        try {
+          const res = await fetch("/api/users/employees"); // backend endpoint
+          if (!res.ok) {
+            throw new Error("Failed to fetch employee list");
+          }
+
+          const data = await res.json();
+          const employees = data.employees || [];
+
+          // Reset cache
+          hrEmployees.length = 0;
+
+          employees.forEach((u) => {
+            const fullName = [u.first_name, u.last_name].filter(Boolean).join(" ");
+            hrEmployees.push({
+              dbId: u.id,                              // numeric users.id
+              staffId: u.user_id,                      // staff login id
+              fullName: fullName || u.user_id || "User",
+            });
+          });
+
+          // Now refresh the dropdowns
+          populateHrEmployeeSelect();
+        } catch (err) {
+          console.error("loadEmployeesForHr error:", err);
+        }
+      }
+
+
+      // Populate HR shift 
+
+      function populateHrEmployeeSelect() {
+        // Clear HR shift employee select
+        hrShiftEmployee.innerHTML = "";
+        const placeholder = document.createElement("option");
+        placeholder.value = "";
+        placeholder.textContent = "-- Select employee --";
+        hrShiftEmployee.appendChild(placeholder);
+
+        // Clear employee-report select as well
+        if (employeeReportSelect) {
+          employeeReportSelect.innerHTML = "";
+          const ph2 = document.createElement("option");
+          ph2.value = "";
+          ph2.textContent = "-- Select employee --";
+          employeeReportSelect.appendChild(ph2);
+        }
+
+        // Use employees loaded from backend
+        hrEmployees.forEach((emp) => {
+          // For HR shift form: we want the DB id to create shifts in backend
+          const opt = document.createElement("option");
+          opt.value = String(emp.dbId);              // numeric users.id
+          opt.textContent = emp.fullName + " (" + emp.staffId + ")";
+          hrShiftEmployee.appendChild(opt);
+
+          // For the reports dropdown we can reuse the same list
+          if (employeeReportSelect) {
+            const opt2 = document.createElement("option");
+            opt2.value = String(emp.dbId);          // we can still use dbId here
+            opt2.textContent = emp.fullName + " (" + emp.staffId + ")";
+            employeeReportSelect.appendChild(opt2);
+          }
+        });
+      }
+
+      function generateEmployeeReport(employeeIdStr) {
+        const empId = parseInt(employeeIdStr, 10);
+        if (!empId || Number.isNaN(empId)) {
+          employeeReportOutput.innerHTML = "Invalid employee.";
+          return;
+        }
+
+        // Find employee meta from hrEmployees (loaded from /api/users/employees)
+        let empMeta = null;
+        if (Array.isArray(hrEmployees) && hrEmployees.length > 0) {
+          empMeta = hrEmployees.find((e) => e.dbId === empId) || null;
+        }
+
+        const empName = empMeta ? empMeta.fullName : `User #${empId}`;
+        const empStaffId = empMeta && empMeta.staffId ? ` (${empMeta.staffId})` : "";
+
+        // ATTENDANCE: match by userId (and fall back to staffId if present)
+        const empAttendance = attendanceLog.filter((e) => {
+          if (e.userId === empId) return true;                // DB-backed entries
+          if (empMeta && e.user === empMeta.staffId) return true; // fallback
+          return false;
+        });
+
+        const totalAttendance = empAttendance.length;
+        const clockIns = empAttendance.filter((e) => e.type === "in").length;
+        const clockOuts = empAttendance.filter((e) => e.type === "out").length;
+
+        let lastIn = "-";
+        let lastOut = "-";
+        for (let i = empAttendance.length - 1; i >= 0; i--) {
+          if (lastIn === "-" && empAttendance[i].type === "in") {
+            lastIn = empAttendance[i].time;
+          }
+          if (lastOut === "-" && empAttendance[i].type === "out") {
+            lastOut = empAttendance[i].time;
+          }
+          if (lastIn !== "-" && lastOut !== "-") break;
+        }
+
+        // LEAVE: match by userId
+        const empLeaves = leaveRequests.filter((r) => r.userId === empId);
+        const totalLeaves = empLeaves.length;
+        const leavesApproved = empLeaves.filter((r) => r.status === "Approved").length;
+        const leavesPending = empLeaves.filter((r) => r.status === "Pending").length;
+        const leavesRejected = empLeaves.filter((r) => r.status === "Rejected").length;
+
+        // SHIFT REQUESTS: match by userId
+        const empShiftReqs = shiftRequests.filter((r) => r.userId === empId);
+        const totalShiftReqs = empShiftReqs.length;
+        const shiftApproved = empShiftReqs.filter((r) => r.status === "Approved").length;
+        const shiftPending = empShiftReqs.filter((r) => r.status === "Pending").length;
+        const shiftRejected = empShiftReqs.filter((r) => r.status === "Rejected").length;
+
+        const tradeCount = empShiftReqs.filter((r) => r.type === "Trade").length;
+        const pickUpCount = empShiftReqs.filter((r) => r.type === "Pick up").length;
+        const dropCount = empShiftReqs.filter((r) => r.type === "Drop").length;
+
+        // We don't track per-employee assigned shifts globally yet in HR view
+        const assignedCount = 0;
+        const assignedListHtml = "<em>Assigned shifts per employee are not yet tracked in this prototype.</em>";
+
+        // Recent leave requests (last 3)
+        let recentLeavesHtml = "";
+        if (empLeaves.length > 0) {
+          const slice = empLeaves.slice(-3);
+          recentLeavesHtml =
+            "<ul>" +
+            slice
+              .map((r) => {
+                const fromDate = (r.from || r.from_date || "").toString().split("T")[0];
+                const toDate = (r.to || r.to_date || "").toString().split("T")[0];
+                return (
+                  "<li>" +
+                  fromDate +
+                  " → " +
+                  toDate +
+                  " – " +
+                  r.reason +
+                  " (" +
+                  r.status +
+                  ")" +
+                  "</li>"
+                );
+              })
+              .join("") +
+            "</ul>";
+        } else {
+          recentLeavesHtml = "<em>No leave requests in this session.</em>";
+        }
+
+        // Recent shift requests (last 3)
+        let recentShiftsHtml = "";
+        if (empShiftReqs.length > 0) {
+          const slice2 = empShiftReqs.slice(-3);
+          recentShiftsHtml =
+            "<ul>" +
+            slice2
+              .map((r) => {
+                return (
+                  "<li>" +
+                  r.type +
+                  " – " +
+                  (r.shiftLabel || "Shift") +
+                  " (" +
+                  r.status +
+                  ")" +
+                  "</li>"
+                );
+              })
+              .join("") +
+            "</ul>";
+        } else {
+          recentShiftsHtml = "<em>No shift requests in this session.</em>";
+        }
+
+        const html =
+          "<strong>" +
+          empName +
+          empStaffId +
+          "</strong><br/><br/>" +
+          "<strong>Attendance</strong><br/>" +
+          "<ul>" +
+          "<li>Total records: " +
+          totalAttendance +
+          " (Clock-ins: " +
+          clockIns +
+          ", Clock-outs: " +
+          clockOuts +
+          ")</li>" +
+          "<li>Last clock-in: " +
+          lastIn +
+          "</li>" +
+          "<li>Last clock-out: " +
+          lastOut +
+          "</li>" +
+          "</ul>" +
+          "<strong>Leave &amp; Absence</strong><br/>" +
+          "<ul>" +
+          "<li>Total requests: " +
+          totalLeaves +
+          "</li>" +
+          "<li>Approved: " +
+          leavesApproved +
+          ", Submitted: " +
+          leavesPending +
+          ", Denied: " +
+          leavesRejected +
+          "</li>" +
+          "</ul>" +
+          "<div style='margin-top:4px;'><em>Recent leave requests:</em><br/>" +
+          recentLeavesHtml +
+          "</div>" +
+          "<br/><strong>Shift activity</strong><br/>" +
+          "<ul>" +
+          "<li>Current assigned shifts: " +
+          assignedCount +
+          "</li>" +
+          "<li>Total shift requests: " +
+          totalShiftReqs +
+          " (Trade: " +
+          tradeCount +
+          ", Pick up: " +
+          pickUpCount +
+          ", Drop: " +
+          dropCount +
+          ")</li>" +
+          "<li>Approved: " +
+          shiftApproved +
+          ", Submitted: " +
+          shiftPending +
+          ", Denied: " +
+          shiftRejected +
+          "</li>" +
+          "</ul>" +
+          "<div style='margin-top:4px;'><em>Current assigned shifts:</em><br/>" +
+          assignedListHtml +
+          "</div>" +
+          "<div style='margin-top:4px;'><em>Recent shift requests:</em><br/>" +
+          recentShiftsHtml +
+          "</div>";
+
+        employeeReportOutput.innerHTML = html;
+      }
+      // QR SCAN HANDLER – this is where a real QR library would call into
+      function handleQrScan(scannedId) {
+        const id = (scannedId || "").trim();
+        if (!id) {
+          if (qrScanStatus) qrScanStatus.textContent = "No QR value provided.";
+          return;
+        }
+        const emp = employees[id];
+        if (!emp) {
+          if (qrScanStatus) qrScanStatus.textContent = "Unknown QR / staff ID: " + id;
+          return;
+        }
+
+        const status = getEmployeeStatus(id);
+        const type = status.clockedIn ? "out" : "in";
+        const now = new Date();
+
+        attendanceLog.push({
+          user: id,
+          type: type,
+          time: now.toLocaleString(),
+        });
+
+        status.clockedIn = !status.clockedIn;
+
+        if (qrScanStatus) {
+          const actionText = type === "in" ? "Clocked IN" : "Clocked OUT";
+          qrScanStatus.textContent =
+            emp.displayName + " – " + actionText + " at " + now.toLocaleString();
+        }
+
+        renderAttendance();
+        updateAttendanceControls();
+      }
+
+      // CAMERA START – placeholder for real QR library
+      function startQrCamera() {
+        if (qrCameraContainer) {
+          qrCameraContainer.textContent =
+            "Camera scanner started (demo). In production, initialise your QR library here " +
+            "and call handleQrScan(decodedText) whenever a QR code is successfully read.";
+        }
+        if (qrScanStatus) {
+          qrScanStatus.textContent = "Camera scanner ready. Awaiting QR code...";
+        }
+
+        /*
+          Example with html5-qrcode (for when you go real):
+  
+          const html5QrCode = new Html5Qrcode("qr-camera-container");
+          html5QrCode.start(
+            { facingMode: "environment" },
+            { fps: 10, qrbox: 250 },
+            (decodedText) => {
+              handleQrScan(decodedText);   // <--- this updates attendance
+            },
+            (errorMessage) => {
+              // optional: handle scan errors
+            }
+          );
+        */
+      }
+
+      // LOGIN LOGIC
+
+      loginForm.addEventListener("submit", async function (e) {
+        e.preventDefault();
+
+        const username = document.getElementById("username").value.trim();
+        const password = document.getElementById("password").value.trim();
+        const selectedRole = roleSelect.value; // "employee" or "hr" from the UI toggle
+
+        loginError.classList.add("hidden");
+        loginError.textContent = "";
+
+        try {
+          const response = await fetch("/api/auth/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            // 🔹 match authController: { userId, password }
+            body: JSON.stringify({ userId: username, password })
+          });
+
+          if (!response.ok) {
+            const errData = await response.json().catch(() => ({}));
+            loginError.textContent =
+              errData.message || "Invalid credentials. Please check role, username and password.";
+            loginError.classList.remove("hidden");
+            return;
+          }
+
+          const data = await response.json();
+          const user = data.user; // this is the payload from authController
+          const roleFromDb = user.roleId === 2 ? "hr" : "employee";
+          const displayNameParts = [user.firstName, user.lastName].filter(Boolean);
+          const displayName = displayNameParts.join(" ") || user.userId;
+
+          currentRole = roleFromDb;
+
+          currentUser = {
+            role: roleFromDb,
+            username: user.userId,     // staff_id style
+            dbId: user.id,             // numeric users.id -> for attendance_logs.user_id
+            displayName: displayName,
+            roleId: user.roleId,
+            departmentId: user.departmentId
+          };
+
+          userRoleLabel.textContent = currentRole === "employee" ? "Employee" : "HR / Admin";
+          userNameLabel.textContent = currentUser.displayName;
+
+          const reportsLink = document.querySelector('.nav-link[data-target="reports"]');
+          if (currentRole === "hr") {
+            if (reportsLink) reportsLink.classList.remove("hidden");
+            attendanceEntryBlock.classList.add("hidden");
+            newShiftRequestSection.classList.add("hidden");
+            hrCreateShiftSection.classList.remove("hidden");
+            shiftRequestsHeading.textContent = "All shift requests (this session)";
+            if (leaveFormSection) leaveFormSection.classList.add("hidden");
+          } else {
+            if (reportsLink) reportsLink.classList.add("hidden");
+            attendanceEntryBlock.classList.remove("hidden");
+            hrCreateShiftSection.classList.add("hidden");
+            newShiftRequestSection.classList.remove("hidden");
+            shiftRequestsHeading.textContent = "Your shift requests (this session)";
+            if (leaveFormSection) leaveFormSection.classList.remove("hidden");
+          }
+
+          loginScreen.classList.add("hidden");
+          dashboardScreen.classList.remove("hidden");
+          showView("dashboard");
+
+          // Load existing attendance from DB 
+          await loadAttendanceForCurrentUser();
+          // Load existing leave requests from DB
+          await loadLeaveForCurrentUser();
+
+          // HR: load employees list for the "Select employee" dropdown + reports
+          if (currentRole === "hr") {
+            await loadEmployeesForHr();
+          }
+          // load shifts for current user (both roles)
+          await loadShiftsForCurrentUser();
+
+          // load shift requests for current user
+          await loadShiftRequestsForCurrentUser();
+
+
+          renderShifts();
+          renderShiftPools();
+          populateShiftOptions();
+          updateAttendanceControls();
+          renderNotifications();
+          updateReports();
+        } catch (err) {
+          console.error("Login error:", err);
+          loginError.textContent = "Login failed due to a server error.";
+          loginError.classList.remove("hidden");
+        }
+      });
+
+      // NAVIGATION
+      navLinks.forEach((link) => {
+        link.addEventListener("click", function () {
+          const target = link.dataset.target;
+          showView(target);
+        });
+      });
+
+      // NOTIFICATION TOGGLE
+      notifBtn.addEventListener("click", function () {
+        notifDropdown.classList.toggle("hidden");
+
+        // When employees open the bell, mark their notifications as seen
+        if (!notifDropdown.classList.contains("hidden") && currentRole === "employee" && currentUser) {
+          notifications.forEach((n) => {
+            if (n.targetRole === "employee" && n.targetUser === currentUser.username) {
+              n.seen = true;
+            }
+          });
+          renderNotifications();
+        }
+      });
+
+      // ATTENDANCE HANDLER (Employees only, one-time per state)
+      attendanceForm.addEventListener("submit", async function (e) {
+        e.preventDefault();
+        if (!currentUser || currentRole !== "employee") return;
+
+        const action = document.querySelector('input[name="attendance-action"]:checked');
+        if (!action) return;
+
+        const type = action.value; // "in" / "out"
+        const status = getEmployeeStatus(currentUser.username);
+
+        // Prevent invalid sequences
+        if (type === "in" && status.clockedIn) return;
+        if (type === "out" && !status.clockedIn) return;
+
+        try {
+          // Save to DB
+          const log = await saveAttendanceToServer({
+            userDbId: currentUser.dbId,  // numeric users.id
+            eventType: type,             // "in" or "out"
+            source: "WEB_FORM",
+            qrValue: null
+          });
+
+          // Push what we got from DB into our in-memory list
+          attendanceLog.push({
+            user: currentUser.username,
+            type: type,
+            time: log.recorded_at
+              ? new Date(log.recorded_at).toLocaleString()
+              : new Date().toLocaleString()
+          });
+
+          // Update state (clocked in/out)
+          status.clockedIn = type === "in";
+
+          renderAttendance();
+          updateAttendanceControls();
+          updateReports();
+        } catch (err) {
+          console.error("Attendance save failed:", err);
+          alert("Could not save attendance. Please try again.");
+        }
+      });
+
+      // LEAVE HANDLER (Employees only)
+      leaveForm.addEventListener("submit", async function (e) {
+        e.preventDefault();
+        if (!currentUser || currentRole !== "employee") return;
+
+        const from = document.getElementById("leave-from").value;
+        const to = document.getElementById("leave-to").value;
+        const reason = document.getElementById("leave-reason").value.trim();
+
+        if (!from || !to || !reason) {
+          alert("Please fill in all fields for the leave request.");
+          return;
+        }
+
+        // Make sure we have the DB id from login
+        if (!currentUser.dbId) {
+          console.error("No dbId on currentUser; cannot submit leave request.");
+          alert("Unable to submit leave request (missing user id). Please log in again.");
+          return;
+        }
+
+        try {
+          // Save to backend
+          const res = await fetch("/api/leave", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              userId: currentUser.dbId, // numeric users.id
+              fromDate: from,          // "YYYY-MM-DD"
+              toDate: to,              // "YYYY-MM-DD"
+              reason: reason
+            })
+          });
+
+          if (!res.ok) {
+            const errData = await res.json().catch(() => ({}));
+            throw new Error(errData.message || "Failed to submit leave request");
+          }
+
+          const data = await res.json();
+          const lv = data.leave; // row returned from the DB
+
+          // Map DB row -> frontend structure
+          let statusBase;
+          switch ((lv.status || "").toUpperCase()) {
+            case "APPROVED":
+              statusBase = "Approved";
+              break;
+            case "REJECTED":
+              statusBase = "Rejected";
+              break;
+            case "PENDING":
+            default:
+              statusBase = "Pending";
+              break;
+          }
+
+          const newReq = {
+            // include username/displayName/userId so renderLeave can show the employee name
+            user: currentUser.username,
+            username: currentUser.username,
+            userId: currentUser.dbId || null,
+            displayName: currentUser.displayName,
+            from: (lv.from_date || from).split("T")[0],
+            to: (lv.to_date || to).split("T")[0],
+            reason: lv.reason || reason,
+            status: statusBase,
+            submittedAt: lv.submitted_at ? lv.submitted_at.split("T")[0] : null,
+          };
+
+          // Keep in-memory list so it shows in table & reports
+          leaveRequests.push(newReq);
+          const indexRef = leaveRequests.length - 1;
+
+          // Notify HR via bell
+          const displayName = currentUser.displayName;
+          addNotification({
+            text: displayName + " – Leave request (" + newReq.from + " → " + newReq.to + ")",
+            kind: "leave",
+            indexRef: indexRef,
+            targetRole: "hr",
+          });
+
+          renderLeave();
+          updateReports();
+          leaveForm.reset();
+        } catch (err) {
+          console.error("Leave submit failed:", err);
+          alert("Could not submit leave request. Please try again.");
+        }
+      });
+
+      // Helpers to map UI shift request action -> DB enums
+      function toDbShiftRequestType(uiType) {
+        const t = (uiType || "").toLowerCase();
+        if (t.includes("pick")) return "PICK_UP";
+        if (t.includes("drop")) return "DROP";
+        return "TRADE";
+      }
+
+      function inferShiftRequestSource(uiType) {
+        // Simple rule: picking up from available shifts → AVAILABLE; others → ASSIGNED
+        const t = (uiType || "").toLowerCase();
+        if (t.includes("pick")) return "AVAILABLE";
+        return "ASSIGNED";
+      }
+
+
+      // SHIFT REQUEST HANDLER (employee, DB-backed)
+      if (shiftForm) {
+        shiftForm.addEventListener("submit", async function (e) {
+          e.preventDefault();
+          if (!currentUser || currentRole !== "employee") return;
+
+          if (!currentUser.dbId) {
+            alert("Missing user id. Please log in again.");
+            return;
+          }
+
+          const action = shiftActionSelect.value;   // "Trade" | "Pick up" | "Drop"
+          const selectedShiftId = shiftSelect.value;
+          const note = shiftNote.value.trim();
+
+          if (!selectedShiftId) {
+            alert("Please select a shift.");
+            return;
+          }
+
+          let pool = getMyShifts();
+          if (action === "Pick up") {
+            pool = availableShifts;
+          }
+
+          const selected = pool.find((s) => String(s.id) === String(selectedShiftId));
+          if (!selected) {
+            alert("Selected shift not found.");
+            return;
+          }
+
+          const shiftId = selected.id;
+          const requestType = toDbShiftRequestType(action);   // PICK_UP / DROP / TRADE
+          const source = inferShiftRequestSource(action);     // AVAILABLE / ASSIGNED
+
+          try {
+            const res = await fetch("/api/shift-requests", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                userId: currentUser.dbId,   // numeric users.id
+                shiftId: shiftId,
+                requestType,
+                note,
+                source,
+              }),
+            });
+
+            if (!res.ok) {
+              const errData = await res.json().catch(() => ({}));
+              throw new Error(errData.message || "Failed to submit shift request");
+            }
+
+            const data = await res.json();
+            const sr = data.shiftRequest;
+
+            // Normalise status
+            const rawStatus = (sr.status || "PENDING").toUpperCase();
+            let baseStatus;
+            if (rawStatus === "APPROVED") baseStatus = "Approved";
+            else if (rawStatus === "REJECTED") baseStatus = "Rejected";
+            else baseStatus = "Pending";
+
+            // Map DB type back to UI label
+            let typeLabel;
+            switch ((sr.request_type || requestType).toUpperCase()) {
+              case "PICK_UP":
+                typeLabel = "Pick up";
+                break;
+              case "DROP":
+                typeLabel = "Drop";
+                break;
+              default:
+                typeLabel = "Trade";
+            }
+
+            const newReq = {
+              id: sr.id,
+              userId: sr.user_id,
+              user: currentUser.username,
+              userDisplayName: currentUser.displayName,
+              type: typeLabel,
+              shiftId: sr.shift_id,
+              shiftLabel: selected.label || `Shift #${sr.shift_id}`,
+              note: sr.note || note || null,
+              status: baseStatus,
+              source: sr.source,
+              createdAt: sr.created_at,
+            };
+
+            const indexRef = shiftRequests.push(newReq) - 1;
+
+            // Notify HR
+            addNotification({
+              text:
+                currentUser.displayName +
+                " – " +
+                typeLabel +
+                " request for shift: " +
+                newReq.shiftLabel,
+              kind: "shift",
+              indexRef,
+              targetRole: "hr",
+            });
+
+            renderShifts();
+            updateReports();
+            shiftForm.reset();
+            populateShiftOptions();
+          } catch (err) {
+            console.error("Shift request submit failed:", err);
+            alert("Could not submit shift request. Please try again.");
+          }
+        });
+      }
+
+      // HR: create shifts for employees (DB-backed, no employeeShiftPools)
+
+      hrShiftForm.addEventListener("submit", async function (e) {
+        e.preventDefault();
+        if (!currentUser || currentRole !== "hr") return;
+
+        // value is users.id (numeric) from populateHrEmployeeSelect()
+        const empIdStr = hrShiftEmployee.value;
+        const desc = hrShiftDesc.value.trim();
+
+        if (!empIdStr || !desc) {
+          alert("Please select an employee and enter a shift description.");
+          return;
+        }
+
+        const assignedToId = parseInt(empIdStr, 10);
+        if (!assignedToId || Number.isNaN(assignedToId)) {
+          alert("Invalid employee selected.");
+          return;
+        }
+
+        try {
+          const res = await fetch("/api/shifts", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              description: desc,
+              assignedToId: assignedToId,  // still recorded if your backend uses it
+              status: "AVAILABLE",        // 🔹 key change so it appears in Available hospital shifts
+            })
+          });
+
+          if (!res.ok) {
+            const errData = await res.json().catch(() => ({}));
+            throw new Error(errData.message || "Failed to create shift");
+          }
+
+          alert("Shift created successfully.");
+
+          hrShiftForm.reset();
+
+          // Refresh shifts from backend so the new one appears under Available hospital shifts
+          await loadShiftsForCurrentUser();
+          populateShiftOptions();
+        } catch (err) {
+          console.error("Failed to create shift:", err);
+          alert("Could not create shift. Please try again.");
+        }
+      });
+
+      // Employee report handler (HR only in practice)
+      if (employeeReportForm) {
+        employeeReportForm.addEventListener("submit", function (e) {
+          e.preventDefault();
+          const employeeId = employeeReportSelect.value; // users.id
+          if (!employeeId) {
+            employeeReportOutput.innerHTML =
+              "Please select an employee to generate a report.";
+            return;
+          }
+          generateEmployeeReport(employeeId);
+        });
+      }
+
+      // Shift action change -> refresh list of shifts to choose from
+      shiftActionSelect.addEventListener("change", populateShiftOptions);
+
+      // QR simulate button
+      if (qrSimBtn) {
+        qrSimBtn.addEventListener("click", function () {
+          handleQrScan(qrSimInput.value);
+        });
+      }
+
+      // QR camera button
+      if (qrCameraBtn) {
+        qrCameraBtn.addEventListener("click", function () {
+          startQrCamera();
+        });
+      }
+
+      // Initial state
+      showView("dashboard");
+      updateMetrics();
+      updateReports();
+      renderNotifications();
+      renderShiftPools();
+      populateShiftOptions();
+      populateHrEmployeeSelect();
+      switchRole("employee");
+      renderAttendance();
+      updateAttendanceControls();
+
+      // Hide Reports tab by default (no user yet)
+      const reportsLinkInit = document.querySelector('.nav-link[data-target="reports"]');
+      if (reportsLinkInit) reportsLinkInit.classList.add("hidden");
+    })();
+  </script>
+</body>
+
+</html>

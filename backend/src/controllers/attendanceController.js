@@ -91,90 +91,88 @@ async function getRecentAttendance(req, res) {
     });
   }
 }
-async function calculateWorkHours(req, res) {
-  try {
-    const userId = Number(req.params.id);
-    if (!userId) {
-      return res.status(400).json({ message: "Invalid user id" });
-    }
+  async function calculateWorkHours(req, res) {
+    try {
+      const userId = Number(req.params.id);
+      if (!userId) return res.status(400).json({ message: "Invalid user id" });
 
-    // Get logs sorted oldest → newest
-    const logs = await getLogsForHours(userId);
+      // Fetch logs sorted oldest → newest
+      const logs = await getLogsForHours(userId);
 
-    const days = {};
-    let i = 0;
+      const days = {};
+      let i = 0;
 
-    while (i < logs.length) {
-      const log = logs[i];
+      while (i < logs.length) {
+        const log = logs[i];
 
-      if (log.event_type === "IN") {
-        const day = new Date(log.recorded_at).toISOString().slice(0, 10);
-        const next = logs[i + 1];
+        // We only care about "IN" to start a pair
+        if (log.event_type === "IN") {
+          const day = new Date(log.recorded_at).toISOString().slice(0, 10);
+          const next = logs[i + 1];
 
-        if (!days[day]) {
-          days[day] = { 
-            totalHours: 0, 
-            incomplete: false,
-            // Capture the first clock in of the day
-            firstClockIn: new Date(log.recorded_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
-            lastClockOut: '-' 
-          };
-        }
+          // Initialize day object if it's new
+          if (!days[day]) {
+            days[day] = {
+              totalHours: 0,
+              incomplete: false,
+              firstClockIn: new Date(log.recorded_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+              lastClockOut: '-' // Default to dash
+            };
+          }
 
-        // If no OUT or next is not OUT → incomplete day
-        if (!next || next.event_type !== "OUT") {
-          days[day].incomplete = true;
+          // SCENARIO 1: Valid Pair (IN -> OUT)
+          if (next && next.event_type === "OUT") {
+            const diffMs = new Date(next.recorded_at) - new Date(log.recorded_at);
+            const diffHours = diffMs / (1000 * 60 * 60);
+
+            days[day].totalHours += diffHours;
+            days[day].lastClockOut = new Date(next.recorded_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+            i += 2; // Skip both IN and OUT
+          } 
+          // SCENARIO 2: Orphaned IN (IN -> IN or IN -> End of List)
+          else {
+            days[day].incomplete = true;
+            // We do NOT update lastClockOut here, so it stays as '-' or the previous valid OUT
+            i += 1; // Skip just this IN and try to match the next one
+          }
+        } else {
+          // Skip stray OUTs that don't have a matching IN
           i++;
-          continue;
         }
-
-        // Capture the latest clock out
-        days[day].lastClockOut = new Date(next.recorded_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-
-        // Calculate hours
-        const diffHours = (new Date(next.recorded_at) - new Date(log.recorded_at)) / (1000 * 60 * 60);
-        days[day].totalHours += diffHours;
-
-        // Skip the OUT row
-        i += 2;
-      } else {
-        i++;
       }
+
+      // Convert object to sorted array
+      const dayList = Object.entries(days).map(([date, info]) => ({
+        date,
+        totalHours: Number(info.totalHours.toFixed(2)),
+        incomplete: info.incomplete,
+        clockIn: info.firstClockIn,
+        clockOut: info.lastClockOut
+      })).sort((a, b) => new Date(b.date) - new Date(a.date));
+
+      // Calculate Weekly Total
+      // FIX: Include hours even if day is incomplete (credit for valid shifts)
+      const weekAgo = new Date();
+      weekAgo.setDate(weekAgo.getDate() - 7);
+
+      const weeklyTotal = dayList.reduce((sum, d) => {
+        const dDate = new Date(d.date);
+        // Only sum if within the last 7 days
+        return (dDate >= weekAgo) ? sum + d.totalHours : sum;
+      }, 0);
+
+      return res.json({
+        userId,
+        weeklyTotal: Number(weeklyTotal.toFixed(2)),
+        days: dayList
+      });
+
+    } catch (err) {
+      console.error("Work hours error:", err);
+      return res.status(500).json({ message: "Failed to calculate work hours" });
     }
-
-    // Convert object into sorted array
-    const dayList = Object.entries(days).map(([date, info]) => ({
-      date,
-      totalHours: Number(info.totalHours.toFixed(2)),
-      incomplete: info.incomplete,
-      clockIn: info.firstClockIn,
-      clockOut: info.lastClockOut
-    })).sort((a, b) => new Date(b.date) - new Date(a.date)); // Sort newest first
-
-    // Calculate weekly summary
-    const now = new Date();
-    const weekAgo = new Date(now);
-    weekAgo.setDate(now.getDate() - 7);
-
-    let weeklyTotal = 0;
-    for (const d of dayList) {
-      const dDate = new Date(d.date);
-      if (dDate >= weekAgo && !d.incomplete) {
-        weeklyTotal += d.totalHours;
-      }
-    }
-
-    return res.json({
-      userId,
-      weeklyTotal: Number(weeklyTotal.toFixed(2)),
-      days: dayList
-    });
-
-  } catch (err) {
-    console.error("Work hours error:", err);
-    return res.status(500).json({ message: "Failed to calculate work hours" });
-  }
-}
+ }
 module.exports = {
   logAttendance,
   getUserAttendance,

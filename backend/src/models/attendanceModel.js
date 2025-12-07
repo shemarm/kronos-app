@@ -89,9 +89,25 @@ async function getRecentAttendanceLogs(limit = 100) {
   const result = await pool.query(query, [limit]);
   return result.rows;
 }
+/**
+ * Fetch logs for work-hour calculations (sorted oldest → newest).
+ */
+async function getLogsForHours(userId) {
+  const query = `
+    SELECT
+      event_type,
+      recorded_at
+    FROM attendance_logs
+    WHERE user_id = $1
+    ORDER BY recorded_at ASC
+  `;
+  const result = await pool.query(query, [userId]);
+  return result.rows;
+}
 
 module.exports = {
   insertAttendanceLog,
   getAttendanceLogsByUser,
-  getRecentAttendanceLogs
+  getRecentAttendanceLogs,
+  getLogsForHours
 };

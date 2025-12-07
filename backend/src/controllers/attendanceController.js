@@ -2,7 +2,8 @@
 const {
   insertAttendanceLog,
   getAttendanceLogsByUser,
-  getRecentAttendanceLogs
+  getRecentAttendanceLogs,
+  getLogsForHours 
 } = require("../models/attendanceModel");
 
 /**
@@ -90,9 +91,88 @@ async function getRecentAttendance(req, res) {
     });
   }
 }
+async function calculateWorkHours(req, res) {
+  try {
+    const userId = Number(req.params.id);
+    if (!userId) {
+      return res.status(400).json({ message: "Invalid user id" });
+    }
+
+    // Get logs sorted oldest → newest
+    const logs = await getLogsForHours(userId);
+
+    const days = {};  
+    let i = 0;
+
+    while (i < logs.length) {
+      const log = logs[i];
+
+      if (log.event_type === "IN") {
+        const day = new Date(log.recorded_at).toISOString().slice(0, 10);
+
+        const next = logs[i + 1];
+
+        if (!days[day]) {
+          days[day] = { totalHours: 0, incomplete: false };
+        }
+
+        // If no OUT or next is not OUT → incomplete day
+        if (!next || next.event_type !== "OUT") {
+          days[day].incomplete = true;
+          i++;
+          continue;
+        }
+
+        // Calculate hours
+        const diffHours =
+          (new Date(next.recorded_at) - new Date(log.recorded_at)) /
+          (1000 * 60 * 60); // ms → hours
+
+        days[day].totalHours += diffHours;
+
+        // Skip the OUT row
+        i += 2;
+      } else {
+        i++;
+      }
+    }
+
+    // Convert object into sorted array
+    const dayList = Object.entries(days).map(([date, info]) => ({
+      date,
+      totalHours: Number(info.totalHours.toFixed(2)),
+      incomplete: info.incomplete
+    }));
+
+    // Calculate weekly summary
+    const now = new Date();
+    const weekAgo = new Date(now);
+    weekAgo.setDate(now.getDate() - 7);
+
+    let weeklyTotal = 0;
+    for (const d of dayList) {
+      const dDate = new Date(d.date);
+      if (dDate >= weekAgo && !d.incomplete) {
+        weeklyTotal += d.totalHours;
+      }
+    }
+
+    return res.json({
+      userId,
+      weeklyTotal: Number(weeklyTotal.toFixed(2)),
+      days: dayList
+    });
+
+  } catch (err) {
+    console.error("Work hours error:", err);
+    return res.status(500).json({ message: "Failed to calculate work hours" });
+  }
+}
+
 
 module.exports = {
   logAttendance,
   getUserAttendance,
-  getRecentAttendance
+  getRecentAttendance,
+  calculateWorkHours 
 };

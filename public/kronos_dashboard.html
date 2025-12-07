@@ -977,32 +977,30 @@
                 </div>
               </form>
             </div>
-              
-         <!-- WORK HOURS SECTION -->
-        <div class="work-hours-section card" style="margin-top: 25px; padding: 20px;">
-         <h2 class="section-title">Work Hours Summary</h2>
-         <p class="view-subtitle" style="margin-bottom: 15px;">
-           Your recorded work hours for the past 7 days:
-          </p>
+                              <!-- WORK HOURS SUMMARY -->
+              <div class="work-hours-section" style="margin-top: 40px;">
+                <h2>Work Hours Summary</h2>
+                <p>Your recorded work hours for the past 7 days:</p>
 
-        <table id="workHoursTable" class="table" style="width: 100%; border-collapse: collapse;">
-          <thead>
-           <tr>
-                <th style="text-align:left; padding: 8px;">Date</th>
-                <th style="text-align:left; padding: 8px;">Clock In</th>
-                <th style="text-align:left; padding: 8px;">Clock Out</th>
-                <th style="text-align:left; padding: 8px;">Duration (hrs)</th>
-                <th style="text-align:left; padding: 8px;">Status</th>
-            </tr>
-         </thead>
-         <tbody></tbody>
-         </table>
+                <table id="workHoursTable" style="width: 100%; margin-top: 15px;">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Clock In</th>
+                            <th>Clock Out</th>
+                            <th>Duration (hrs)</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
 
-      <div id="weeklyTotal" style="margin-top: 15px; font-weight: 600;">
-      Weekly Total: Loading...
-  </div>
-</div>
+                <div id="weeklyTotal" style="margin-top: 15px; font-weight: bold;">
+                    Weekly Total: Loading...
+                </div>
+              </div>
 
+         
             <!-- QR ATTENDANCE SECTION -->
             <div class="section" id="qr-section" style="margin-top:10px;">
               <div class="section-title">QR code attendance</div>
@@ -3193,48 +3191,47 @@
       switchRole("employee");
       renderAttendance();
       updateAttendanceControls();
+      updateDashboardUI();
 
       /* -------------------------------
-   WORK HOURS FETCH + RENDER
---------------------------------*/
-async function loadWorkHours() {
-  if (!currentUser || !currentUser.dbId) return;
+      WORK HOURS FETCH + RENDER
+    --------------------------------*/
+      async function loadWorkHours() {
+        if (!currentUser) return;
 
-  const userId = currentUser.dbId;
+        try {
+          const res = await fetch(`/api/attendance/user/${currentUser}/hours`);
+          const data = await res.json();
 
-  try {
-    const response = await fetch(`/api/attendance/user/${userId}/hours`);
-    if (!response.ok) throw new Error("Failed to load work hours");
+          if (!data.success) {
+            console.warn("Work hours fetch failed:", data.message);
+            return;
+          }
 
-    const data = await response.json();  // { days: [...], weeklyTotal: ... }
+          const table = document.querySelector("#workHoursTable tbody");
+          const total = document.querySelector("#weeklyTotal");
 
-    const tableBody = document.querySelector("#workHoursTable tbody");
-    const weeklyTotalDiv = document.getElementById("weeklyTotal");
+          table.innerHTML = "";
+          let weeklyHours = 0;
 
-    tableBody.innerHTML = "";
+          data.records.forEach((r) => {
+            const row = document.createElement("tr");
+            row.innerHTML = `
+              <td>${r.date}</td>
+              <td>${r.clockIn || "-"}</td>
+              <td>${r.clockOut || "-"}</td>
+              <td>${r.hours || 0}</td>
+              <td>${r.status}</td>
+            `;
+            weeklyHours += Number(r.hours || 0);
+            table.appendChild(row);
+          });
 
-    data.days.forEach(day => {
-      const row = document.createElement("tr");
-      row.innerHTML = `
-        <td>${day.date}</td>
-        <td>${day.clockIn || "--"}</td>
-        <td>${day.clockOut || "--"}</td>
-        <td>${day.totalHours}</td>
-        <td>${day.incomplete ? "In Progress" : "Complete"}</td>
-      `;
-      tableBody.appendChild(row);
-    });
-
-    weeklyTotalDiv.textContent = `Weekly Total: ${data.weeklyTotal} hours`;
-  } catch (err) {
-    console.error("Work hours fetch failed:", err);
-  }
-}
-
-/* Make sure work hours load whenever the Attendance tab opens */
-const attendanceNav = document.querySelector('.nav-link[data-target="attendance"]');
-attendanceNav.addEventListener("click", loadWorkHours);
-
+          total.innerText = `Weekly Total: ${weeklyHours.toFixed(2)} hrs`;
+        } catch (err) {
+          console.error("Error loading work hours:", err);
+        }
+      }
 
       // Hide Reports tab by default (no user yet)
       const reportsLinkInit = document.querySelector('.nav-link[data-target="reports"]');

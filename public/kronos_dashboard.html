@@ -760,6 +760,55 @@
       border-radius: 999px;
       border: 1px dashed rgba(148, 163, 184, 0.8);
       color: var(--text-muted);
+      /* --- NEW TABLE STYLES --- */
+    #workHoursTable {
+      border-collapse: separate;
+      border-spacing: 0;
+      width: 100%;
+      margin-top: 15px;
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+    }
+
+    #workHoursTable th {
+      text-transform: none;
+      font-size: 12px;
+      color: #94a3b8;
+      font-weight: 600;
+      padding: 12px 16px;
+      border-bottom: 1px solid rgba(51, 65, 85, 0.5);
+      background: transparent;
+    }
+
+    #workHoursTable td {
+      padding: 16px 16px;
+      vertical-align: middle;
+      border-bottom: 1px solid rgba(51, 65, 85, 0.3);
+      color: #f8fafc;
+    }
+
+    /* Stacked Time Column */
+    .time-stack { display: flex; flex-direction: column; gap: 2px; }
+    .time-date { font-size: 11px; color: #64748b; margin-bottom: 4px; }
+    .time-entry { font-weight: 500; font-size: 13px; color: #e2e8f0; }
+    .time-entry span { color: #94a3b8; font-size: 11px; margin-right: 4px; font-weight: 600; }
+
+    /* Duration Column */
+    .duration-main { color: #4ade80; font-family: monospace; font-size: 13px; letter-spacing: 0.5px; }
+    .duration-sub { font-size: 11px; color: #64748b; margin-top: 2px; }
+
+    /* Status Column */
+    .status-text-progress { color: #facc15; font-weight: 700; text-transform: uppercase; font-size: 12px; }
+    .status-text-complete { color: #e2e8f0; font-weight: 400; font-size: 13px; }
+
+    /* Audit Badges */
+    .audit-badge { display: inline-flex; align-items: center; justify-content: center; padding: 4px 12px; border-radius: 999px; font-size: 11px; font-weight: 600; min-width: 80px; }
+    .audit-in { background: rgba(234, 179, 8, 0.15); border: 1px solid rgba(234, 179, 8, 0.3); color: #facc15; }
+    .audit-synced { background: rgba(34, 197, 94, 0.15); border: 1px solid rgba(34, 197, 94, 0.3); color: #4ade80; }
+
+    /* Total Footer */
+    .table-footer-total { text-align: right; padding: 12px 16px; font-size: 12px; color: #94a3b8; font-weight: 600; text-transform: uppercase; border-top: 1px solid rgba(51, 65, 85, 0.5); }
+    .total-highlight { color: #e2e8f0; font-weight: 700; margin-left: 4px; }
     }
   </style>
 </head>
@@ -977,28 +1026,28 @@
                 </div>
               </form>
             </div>
-                              <!-- WORK HOURS SUMMARY -->
-              <div class="work-hours-section" style="margin-top: 40px;">
-                <h2>Work Hours Summary</h2>
-                <p>Your recorded work hours for the past 7 days:</p>
-
-                <table id="workHoursTable" style="width: 100%; margin-top: 15px;">
-                    <thead>
-                        <tr>
-                            <th>Date</th>
-                            <th>Clock In</th>
-                            <th>Clock Out</th>
-                            <th>Duration (hrs)</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
-
-                <div id="weeklyTotal" style="margin-top: 15px; font-weight: bold;">
-                    Weekly Total: Loading...
-                </div>
+                <div class="work-hours-section" style="margin-top: 40px;">
+              <div class="section-title">Work Hours Summary</div>
+              <p class="section-body" style="margin-bottom:10px;">Your recorded activity for the past 7 days.</p>
+            
+              <table id="workHoursTable">
+                  <thead>
+                      <tr>
+                          <th style="width: 30%">Clock In / Out Times</th>
+                          <th style="width: 20%">Duration</th>
+                          <th style="width: 15%">Status</th>
+                          <th style="width: 15%">Device</th>
+                          <th style="text-align: right;">Audit</th>
+                      </tr>
+                  </thead>
+                  <tbody>
+                      </tbody>
+              </table>
+            
+              <div id="weeklyTotal" class="table-footer-total">
+                  TOTAL: <span class="total-highlight">Loading...</span>
               </div>
+            </div>
 
          
             <!-- QR ATTENDANCE SECTION -->
@@ -3195,18 +3244,27 @@
       updateDashboardUI();
 
     
-// Load Work Hours (Client-Side)
+// Helper to format decimal hours to HH:MM:SS
+      function formatDecimalToTime(decimalHours) {
+        if (!decimalHours) return "00:00:00";
+        const totalSeconds = Math.floor(decimalHours * 3600);
+        const h = Math.floor(totalSeconds / 3600);
+        const m = Math.floor((totalSeconds % 3600) / 60);
+        const s = totalSeconds % 60;
+        return `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+      }
+
+      // NEW Load Work Hours Function
       async function loadWorkHours() {
         const tableBody = document.querySelector("#workHoursTable tbody");
         const weeklyTotalDiv = document.getElementById("weeklyTotal");
 
         // Reset UI
         tableBody.innerHTML = "";
-        weeklyTotalDiv.textContent = "Weekly Total: Loading...";
+        weeklyTotalDiv.innerHTML = 'TOTAL: <span class="total-highlight">...</span>';
 
-        // Guard: Ensure user is logged in
         if (!currentUser || !currentUser.dbId) {
-          weeklyTotalDiv.textContent = "Weekly Total: 0 hrs (Not logged in)";
+          weeklyTotalDiv.innerHTML = 'TOTAL: <span class="total-highlight">0.00 Hours</span>';
           return;
         }
 
@@ -3215,39 +3273,67 @@
           if (!res.ok) throw new Error("Failed to fetch hours");
 
           const data = await res.json();
-          // data = { userId, weeklyTotal, days: [...] }
+          
+          // Update Total Footer
+          weeklyTotalDiv.innerHTML = `TOTAL: <span class="total-highlight">${data.weeklyTotal} Hours</span>`;
 
-          weeklyTotalDiv.textContent = `Weekly Total: ${data.weeklyTotal} hrs`;
-
-          if (data.days.length === 0) {
-            const tr = document.createElement("tr");
-            tr.innerHTML = `<td colspan="5" style="text-align:center;">No work hours recorded yet.</td>`;
-            tableBody.appendChild(tr);
+          if (!data.days || data.days.length === 0) {
+            tableBody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 20px; color: #64748b;">No work activity found.</td></tr>`;
             return;
           }
 
           data.days.forEach(day => {
             const tr = document.createElement("tr");
-            
-            // Format Status pill
-            let statusHtml = `<span class="pill-status status-approved">Complete</span>`;
+
+            // Format Date
+            const dateObj = new Date(day.date);
+            const dateStr = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+
+            // Determine Status
+            let statusHtml = '';
+            let auditHtml = '';
+            let durationClass = '';
+
             if (day.incomplete) {
-              statusHtml = `<span class="pill-status status-rejected">Incomplete</span>`;
+              statusHtml = `<span class="status-text-progress">IN PROGRESS</span>`;
+              auditHtml = `<span class="audit-badge audit-in">Clocked In</span>`;
+              durationClass = ''; 
+            } else {
+              statusHtml = `<span class="status-text-complete">Complete</span>`;
+              auditHtml = `<span class="audit-badge audit-synced">Synced</span>`;
+              durationClass = 'duration-main';
             }
 
+            // Format Duration
+            const hhmmss = formatDecimalToTime(day.totalHours);
+            const durationDisplay = day.incomplete ? '—' : hhmmss;
+
             tr.innerHTML = `
-              <td>${day.date}</td>
-              <td>${day.clockIn}</td>
-              <td>${day.clockOut}</td>
-              <td style="font-weight:bold;">${day.totalHours}</td>
+              <td>
+                <div class="time-stack">
+                  <div class="time-date">${dateStr}</div>
+                  <div class="time-entry"><span>IN:</span> ${day.clockIn || '--:--'}</div>
+                  ${ day.clockOut && day.clockOut !== '-' 
+                     ? `<div class="time-entry"><span>OUT:</span> ${day.clockOut}</div>` 
+                     : '' 
+                   }
+                </div>
+              </td>
+              <td>
+                <div class="${durationClass}">${durationDisplay}</div>
+                ${ !day.incomplete ? `<div class="duration-sub">(${day.totalHours} hrs)</div>` : '' }
+              </td>
               <td>${statusHtml}</td>
+              <td>Web Dashboard</td>
+              <td style="text-align: right;">${auditHtml}</td>
             `;
+
             tableBody.appendChild(tr);
           });
 
         } catch (err) {
           console.error(err);
-          weeklyTotalDiv.textContent = "Error loading work hours.";
+          weeklyTotalDiv.innerHTML = 'TOTAL: <span class="total-highlight">Error</span>';
         }
       }
 

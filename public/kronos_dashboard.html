@@ -3193,45 +3193,65 @@
       updateAttendanceControls();
       updateDashboardUI();
 
-      /* -------------------------------
-      WORK HOURS FETCH + RENDER
-    --------------------------------*/
-      async function loadWorkHours() {
-        if (!currentUser) return;
+      async function calculateWorkHours(req, res) {
+  try {
+    const userId = Number(req.params.id);
+    if (!userId) {
+      return res.status(400).json({ success: false, message: "Invalid user id" });
+    }
 
-        try {
-          const res = await fetch(`/api/attendance/user/${currentUser}/hours`);
-          const data = await res.json();
+    // Fetch logs sorted oldest → newest
+    const logs = await getLogsForHours(userId);
 
-          if (!data.success) {
-            console.warn("Work hours fetch failed:", data.message);
-            return;
-          }
+    const records = [];
+    let i = 0;
 
-          const table = document.querySelector("#workHoursTable tbody");
-          const total = document.querySelector("#weeklyTotal");
+    while (i < logs.length) {
+      const log = logs[i];
 
-          table.innerHTML = "";
-          let weeklyHours = 0;
+      if (log.event_type === "IN") {
+        const clockIn = new Date(log.recorded_at);
+        const next = logs[i + 1];
 
-          data.records.forEach((r) => {
-            const row = document.createElement("tr");
-            row.innerHTML = `
-              <td>${r.date}</td>
-              <td>${r.clockIn || "-"}</td>
-              <td>${r.clockOut || "-"}</td>
-              <td>${r.hours || 0}</td>
-              <td>${r.status}</td>
-            `;
-            weeklyHours += Number(r.hours || 0);
-            table.appendChild(row);
-          });
+        let clockOut = null;
+        let status = "Incomplete";
+        let hours = 0;
 
-          total.innerText = `Weekly Total: ${weeklyHours.toFixed(2)} hrs`;
-        } catch (err) {
-          console.error("Error loading work hours:", err);
+        // Valid OUT?
+        if (next && next.event_type === "OUT") {
+          clockOut = new Date(next.recorded_at);
+          const diffMs = clockOut - clockIn;
+          hours = diffMs / (1000 * 60 * 60);
+          status = "Complete";
+          i += 2; // skip OUT row
+        } else {
+          i += 1;
         }
+
+        records.push({
+          date: clockIn.toISOString().slice(0, 10),
+          clockIn: clockIn.toLocaleTimeString(),
+          clockOut: clockOut ? clockOut.toLocaleTimeString() : null,
+          hours: Number(hours.toFixed(2)),
+          status
+        });
+
+      } else {
+        i++;
       }
+    }
+
+    return res.json({
+      success: true,
+      records
+    });
+
+  } catch (err) {
+    console.error("Work hours error:", err);
+    return res.status(500).json({ success: false, message: "Failed to calculate work hours" });
+  }
+}
+
 
       // Hide Reports tab by default (no user yet)
       const reportsLinkInit = document.querySelector('.nav-link[data-target="reports"]');

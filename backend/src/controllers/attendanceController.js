@@ -101,7 +101,7 @@ async function calculateWorkHours(req, res) {
     // Get logs sorted oldest → newest
     const logs = await getLogsForHours(userId);
 
-    const days = {};  
+    const days = {};
     let i = 0;
 
     while (i < logs.length) {
@@ -109,11 +109,16 @@ async function calculateWorkHours(req, res) {
 
       if (log.event_type === "IN") {
         const day = new Date(log.recorded_at).toISOString().slice(0, 10);
-
         const next = logs[i + 1];
 
         if (!days[day]) {
-          days[day] = { totalHours: 0, incomplete: false };
+          days[day] = { 
+            totalHours: 0, 
+            incomplete: false,
+            // Capture the first clock in of the day
+            firstClockIn: new Date(log.recorded_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+            lastClockOut: '-' 
+          };
         }
 
         // If no OUT or next is not OUT → incomplete day
@@ -123,11 +128,11 @@ async function calculateWorkHours(req, res) {
           continue;
         }
 
-        // Calculate hours
-        const diffHours =
-          (new Date(next.recorded_at) - new Date(log.recorded_at)) /
-          (1000 * 60 * 60); // ms → hours
+        // Capture the latest clock out
+        days[day].lastClockOut = new Date(next.recorded_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
 
+        // Calculate hours
+        const diffHours = (new Date(next.recorded_at) - new Date(log.recorded_at)) / (1000 * 60 * 60);
         days[day].totalHours += diffHours;
 
         // Skip the OUT row
@@ -141,8 +146,10 @@ async function calculateWorkHours(req, res) {
     const dayList = Object.entries(days).map(([date, info]) => ({
       date,
       totalHours: Number(info.totalHours.toFixed(2)),
-      incomplete: info.incomplete
-    }));
+      incomplete: info.incomplete,
+      clockIn: info.firstClockIn,
+      clockOut: info.lastClockOut
+    })).sort((a, b) => new Date(b.date) - new Date(a.date)); // Sort newest first
 
     // Calculate weekly summary
     const now = new Date();
@@ -168,8 +175,6 @@ async function calculateWorkHours(req, res) {
     return res.status(500).json({ message: "Failed to calculate work hours" });
   }
 }
-
-
 module.exports = {
   logAttendance,
   getUserAttendance,

@@ -1842,6 +1842,7 @@
         if (viewName === "attendance") {
           // Reload attendance from DB
           loadAttendanceForCurrentUser();
+          loadWorkHours();
         } else if (viewName === "leave") {
           // Reload leave from DB
           loadLeaveForCurrentUser();
@@ -3193,65 +3194,62 @@
       updateAttendanceControls();
       updateDashboardUI();
 
-      async function calculateWorkHours(req, res) {
-  try {
-    const userId = Number(req.params.id);
-    if (!userId) {
-      return res.status(400).json({ success: false, message: "Invalid user id" });
-    }
+    
+// Load Work Hours (Client-Side)
+      async function loadWorkHours() {
+        const tableBody = document.querySelector("#workHoursTable tbody");
+        const weeklyTotalDiv = document.getElementById("weeklyTotal");
 
-    // Fetch logs sorted oldest → newest
-    const logs = await getLogsForHours(userId);
+        // Reset UI
+        tableBody.innerHTML = "";
+        weeklyTotalDiv.textContent = "Weekly Total: Loading...";
 
-    const records = [];
-    let i = 0;
-
-    while (i < logs.length) {
-      const log = logs[i];
-
-      if (log.event_type === "IN") {
-        const clockIn = new Date(log.recorded_at);
-        const next = logs[i + 1];
-
-        let clockOut = null;
-        let status = "Incomplete";
-        let hours = 0;
-
-        // Valid OUT?
-        if (next && next.event_type === "OUT") {
-          clockOut = new Date(next.recorded_at);
-          const diffMs = clockOut - clockIn;
-          hours = diffMs / (1000 * 60 * 60);
-          status = "Complete";
-          i += 2; // skip OUT row
-        } else {
-          i += 1;
+        // Guard: Ensure user is logged in
+        if (!currentUser || !currentUser.dbId) {
+          weeklyTotalDiv.textContent = "Weekly Total: 0 hrs (Not logged in)";
+          return;
         }
 
-        records.push({
-          date: clockIn.toISOString().slice(0, 10),
-          clockIn: clockIn.toLocaleTimeString(),
-          clockOut: clockOut ? clockOut.toLocaleTimeString() : null,
-          hours: Number(hours.toFixed(2)),
-          status
-        });
+        try {
+          const res = await fetch(`/api/attendance/user/${currentUser.dbId}/hours`);
+          if (!res.ok) throw new Error("Failed to fetch hours");
 
-      } else {
-        i++;
+          const data = await res.json();
+          // data = { userId, weeklyTotal, days: [...] }
+
+          weeklyTotalDiv.textContent = `Weekly Total: ${data.weeklyTotal} hrs`;
+
+          if (data.days.length === 0) {
+            const tr = document.createElement("tr");
+            tr.innerHTML = `<td colspan="5" style="text-align:center;">No work hours recorded yet.</td>`;
+            tableBody.appendChild(tr);
+            return;
+          }
+
+          data.days.forEach(day => {
+            const tr = document.createElement("tr");
+            
+            // Format Status pill
+            let statusHtml = `<span class="pill-status status-approved">Complete</span>`;
+            if (day.incomplete) {
+              statusHtml = `<span class="pill-status status-rejected">Incomplete</span>`;
+            }
+
+            tr.innerHTML = `
+              <td>${day.date}</td>
+              <td>${day.clockIn}</td>
+              <td>${day.clockOut}</td>
+              <td style="font-weight:bold;">${day.totalHours}</td>
+              <td>${statusHtml}</td>
+            `;
+            tableBody.appendChild(tr);
+          });
+
+        } catch (err) {
+          console.error(err);
+          weeklyTotalDiv.textContent = "Error loading work hours.";
+        }
       }
-    }
-
-    return res.json({
-      success: true,
-      records
-    });
-
-  } catch (err) {
-    console.error("Work hours error:", err);
-    return res.status(500).json({ success: false, message: "Failed to calculate work hours" });
-  }
-}
-
 
       // Hide Reports tab by default (no user yet)
       const reportsLinkInit = document.querySelector('.nav-link[data-target="reports"]');

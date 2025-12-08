@@ -3040,6 +3040,7 @@
           renderAttendance();
           updateAttendanceControls();
           updateReports();
+          loadWorkHours();
         } catch (err) {
           console.error("Attendance save failed:", err);
           alert("Could not save attendance. Please try again.");
@@ -3405,12 +3406,11 @@
 
           data.days.forEach(day => {
             const tr = document.createElement("tr");
-
-            // Format Date
+            // Format Date (Using your preferred Mmm D, YYYY format)
             const dateObj = new Date(day.date);
             const dateStr = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 
-            // Determine Status
+            // Determine Status, Audit Text, and Duration Class (Using your logic)
             let statusHtml = '';
             let auditHtml = '';
             let durationClass = '';
@@ -3418,7 +3418,7 @@
             if (day.incomplete) {
               statusHtml = `<span class="status-text-progress">IN PROGRESS</span>`;
               auditHtml = `<span class="audit-badge audit-in">Clocked In</span>`;
-              durationClass = ''; 
+              durationClass = 'duration-incomplete'; // Applying a class for coloring incomplete hours
             } else {
               statusHtml = `<span class="status-text-complete">Complete</span>`;
               auditHtml = `<span class="audit-badge audit-synced">Synced</span>`;
@@ -3426,28 +3426,21 @@
             }
 
             // Format Duration
+          
             const hhmmss = formatDecimalToTime(day.totalHours);
             const durationDisplay = day.incomplete ? '—' : hhmmss;
 
+            
+            const clockInDisplay = day.clockIn ? day.clockIn.substring(0, 5) : '--:--';
+            const clockOutDisplay = day.clockOut && day.clockOut !== '-' ? day.clockOut.substring(0, 5) : 'PENDING';
+            
+            const timeRangeDisplay = `${clockInDisplay} – ${clockOutDisplay}`;
+
+            
             tr.innerHTML = `
-              <td>
-                <div class="time-stack">
-                  <div class="time-date">${dateStr}</div>
-                  <div class="time-entry"><span>IN:</span> ${day.clockIn || '--:--'}</div>
-                  ${ day.clockOut && day.clockOut !== '-' 
-                     ? `<div class="time-entry"><span>OUT:</span> ${day.clockOut}</div>` 
-                     : '' 
-                   }
-                </div>
-              </td>
-              <td>
+              <td>${dateStr}</td> <td>${timeRangeDisplay}</td> <td>
                 <div class="${durationClass}">${durationDisplay}</div>
-                ${ !day.incomplete ? `<div class="duration-sub">(${day.totalHours} hrs)</div>` : '' }
-              </td>
-              <td>${statusHtml}</td>
-              <td>Web Dashboard</td>
-              <td style="text-align: right;">${auditHtml}</td>
-            `;
+              </td> <td>${statusHtml}</td> <td>Web Dashboard</td> <td style="text-align: right;">${auditHtml}</td> `;
 
             tableBody.appendChild(tr);
           });

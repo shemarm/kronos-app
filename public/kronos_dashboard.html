@@ -760,6 +760,7 @@
       border-radius: 999px;
       border: 1px dashed rgba(148, 163, 184, 0.8);
       color: var(--text-muted);
+    }
       /* --- NEW TABLE STYLES --- */
     #workHoursTable {
       border-collapse: separate;
@@ -2035,7 +2036,126 @@
         updateMetrics();
         updateReports();
       }
+        
+        function renderShifts() {
+          shiftRows.innerHTML = "";
 
+          const rows = shiftRequests;
+
+          if (rows.length === 0) {
+            const tr = document.createElement("tr");
+            const td = document.createElement("td");
+            td.colSpan = 5;
+            td.textContent = "No shift requests yet.";
+            tr.appendChild(td);
+            shiftRows.appendChild(tr);
+            return;
+          }
+
+          rows.forEach((req, index) => {
+            const tr = document.createElement("tr");
+            const tdIndex = document.createElement("td");
+            const tdEmp = document.createElement("td");
+            const tdType = document.createElement("td");
+            const tdDetails = document.createElement("td");
+            const tdStatus = document.createElement("td");
+
+            tdIndex.textContent = (index + 1).toString();
+
+            // Show employee name
+            const name = req.userDisplayName || req.user || "-";
+            tdEmp.textContent = name;
+
+            tdType.textContent = req.type;
+            tdDetails.textContent = (req.shiftLabel || "Shift") + (req.note ? " - " + req.note : "");
+
+            const statusInfo = formatStatus(req.status);
+            const statusPill = document.createElement("span");
+            statusPill.classList.add("pill-status");
+            if (statusInfo.cls) statusPill.classList.add(statusInfo.cls);
+            statusPill.textContent = statusInfo.label;
+            tdStatus.appendChild(statusPill);
+
+            tr.appendChild(tdIndex);
+            tr.appendChild(tdEmp);
+            tr.appendChild(tdType);
+            tr.appendChild(tdDetails);
+            tr.appendChild(tdStatus);
+
+            shiftRows.appendChild(tr);
+          });
+
+          updateMetrics();
+          updateReports();
+        }
+
+        // ========================================
+        // HANDLE SHIFT ACTION (HR APPROVAL/REJECTION)
+        // ========================================
+        async function handleShiftAction(index, newStatus) {
+          const req = shiftRequests[index];
+          if (!req) return;
+          if (!currentUser || currentRole !== "hr") return;
+
+          const requestId = req.id;
+          if (!requestId) {
+            console.error("Missing shift request id:", req);
+            return;
+          }
+
+          try {
+            const res = await fetch(`/api/shift-requests/${requestId}/status`, {
+              method: "PATCH",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                status: newStatus,
+                approverId: currentUser.dbId
+              })
+            });
+
+            if (!res.ok) {
+              const errData = await res.json().catch(() => ({}));
+              throw new Error(errData.message || "Failed to update shift request status");
+            }
+
+            const data = await res.json();
+            const updated = data.shiftRequest || {};
+
+            // Normalize status
+            const rawStatus = (updated.status || newStatus || "PENDING").toUpperCase();
+            let baseStatus;
+            if (rawStatus === "APPROVED") baseStatus = "Approved";
+            else if (rawStatus === "REJECTED") baseStatus = "Rejected";
+            else baseStatus = "Pending";
+
+            req.status = baseStatus;
+            req.approvedBy = updated.approved_by || null;
+            req.approvedAt = updated.approved_at || null;
+
+            // Notify employee if we have their username
+            if (req.user) {
+              addNotification({
+                text:
+                  "Your " +
+                  req.type +
+                  " request for " +
+                  (req.shiftLabel || "shift") +
+                  " was " +
+                  baseStatus,
+                kind: "shift",
+                indexRef: index,
+                targetRole: "employee",
+                targetUser: req.user
+              });
+            }
+
+            renderShifts();
+            renderNotifications();
+          } catch (err) {
+            console.error("handleShiftAction error:", err);
+            alert("Could not update shift request status. Please try again.");
+          }
+}
 
       // HR-only: update leave status via API and refresh UI
 
@@ -2694,6 +2814,8 @@
           "</div>";
 
         employeeReportOutput.innerHTML = html;
+
+
       }
       // QR SCAN HANDLER – this is where a real QR library would call into
       function handleQrScan(scannedId) {
@@ -3240,7 +3362,7 @@
       switchRole("employee");
       renderAttendance();
       updateAttendanceControls();
-      updateDashboardUI();
+      
 
     
 // Helper to format decimal hours to HH:MM:SS

@@ -6,6 +6,7 @@
   <title>K.R.O.N.O.S – Attendance Management</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
   <style>
     :root {
       --bg: #020617;
@@ -1028,7 +1029,15 @@
                   <button type="submit" class="btn-small">Submit</button>
                 </div>
               </form>
-              </div>
+            </div>
+
+            <div class="section" style="margin-top: 20px;">
+              <div class="section-title">Attendance Log</div>
+              <table>
+                <thead id="attendance-head"></thead>
+                <tbody id="attendance-rows"></tbody>
+              </table>
+            </div>
             
             <div class="work-hours-section" style="margin-top: 40px;">
               <div class="section-title">Work Hours Summary</div>
@@ -1058,27 +1067,38 @@
               <div class="section-body">
                 In production this would use the camera to scan the QR on each staff ID badge.
                 For this prototype, type a staff username (for example <code>employee1</code>) and click
-                <strong>Simulate scan</strong>, or click <strong>Use camera scanner</strong> to see where a real scanner
-                would hook in.
+                <strong>Submit</strong>, or click <strong>Start Scanner</strong> to use camera.
               </div>
               <div class="form-row" style="margin-top:6px;">
                 <div class="field">
-                  <div class="field-label">Simulated QR value</div>
-                  <input id="qr-sim-input" type="text" class="input" placeholder="e.g. employee1" />
+                  <div class="field-label">Employee ID</div>
+                  <input id="qr-manual-input" type="text" class="input" placeholder="e.g. employee1" />
                 </div>
                 <div class="field" style="flex:0 0 auto; align-self:flex-end;">
-                  <button type="button" id="qr-sim-btn" class="btn-small">Simulate scan</button>
-                  <button type="button" id="qr-camera-btn" class="btn-small" style="margin-left:6px;">
-                    Use camera scanner
-                  </button>
+                  <button type="button" id="qr-manual-btn" class="btn-small">Submit</button>
                 </div>
               </div>
-              <div class="section-body" id="qr-scan-status" style="margin-top:4px; font-size:11px;">
-                Waiting for scan…
+              <div style="margin-top:12px;">
+                <div class="field-label">Camera Scanner</div>
+                <div style="position:relative; width:280px; height:210px; background:#111; border-radius:8px; overflow:hidden; margin-top:6px;">
+                  <video id="qr-video" autoplay playsinline style="width:100%; height:100%; object-fit:cover;"></video>
+                  <div id="qr-scan-frame" style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:140px; height:140px; border:2px solid #38bdf8; border-radius:8px; display:none;"></div>
+                </div>
+                <canvas id="qr-canvas" style="display:none;"></canvas>
+                <div style="margin-top:8px;">
+                  <button type="button" id="qr-start-btn" class="btn-small">Start Scanner</button>
+                  <button type="button" id="qr-stop-btn" class="btn-small" style="margin-left:6px;" disabled>Stop Scanner</button>
+                </div>
               </div>
-              <div class="section-body" id="qr-camera-container" style="margin-top:4px; font-size:11px;">
-                Camera scanner not started. In production, this area would show the live video preview from the QR
-                reader.
+              <div id="qr-result-display" style="display:none; margin-top:16px; padding:20px; background:rgba(15,23,42,0.9); border-radius:12px; text-align:center; border:2px solid #22c55e;">
+                <div id="qr-result-icon" style="font-size:3rem; color:#22c55e;">✓</div>
+                <div id="qr-result-message" style="font-size:1.4rem; font-weight:700; color:#22c55e; margin:8px 0;">Successfully Clocked In!</div>
+                <div id="qr-result-time" style="font-size:1.6rem; font-weight:600; color:#fff; font-family:monospace;">08:30:00 AM</div>
+                <div id="qr-result-name" style="font-size:1rem; color:#9ca3af; margin-top:4px;">Sarah Johnson</div>
+                <button type="button" id="qr-new-scan-btn" class="btn-small" style="margin-top:12px;">Scan Another</button>
+              </div>
+              <div class="section-body" id="qr-scan-status" style="margin-top:8px; font-size:11px;">
+                Ready for scanning...
               </div>
             </div>
           </div> 
@@ -1483,13 +1503,24 @@
       }
 
 
-
       // QR attendance elements
-      const qrSimInput = document.getElementById("qr-sim-input");
-      const qrSimBtn = document.getElementById("qr-sim-btn");
-      const qrCameraBtn = document.getElementById("qr-camera-btn");
+      const qrManualInput = document.getElementById("qr-manual-input");
+      const qrManualBtn = document.getElementById("qr-manual-btn");
       const qrScanStatus = document.getElementById("qr-scan-status");
-      const qrCameraContainer = document.getElementById("qr-camera-container");
+      const qrVideo = document.getElementById("qr-video");
+      const qrCanvas = document.getElementById("qr-canvas");
+      const qrStartBtn = document.getElementById("qr-start-btn");
+      const qrStopBtn = document.getElementById("qr-stop-btn");
+      const qrScanFrame = document.getElementById("qr-scan-frame");
+      const qrResultDisplay = document.getElementById("qr-result-display");
+      const qrResultIcon = document.getElementById("qr-result-icon");
+      const qrResultMessage = document.getElementById("qr-result-message");
+      const qrResultTime = document.getElementById("qr-result-time");
+      const qrResultName = document.getElementById("qr-result-name");
+      const qrNewScanBtn = document.getElementById("qr-new-scan-btn");
+      let qrStream = null;
+      let qrScanning = false;
+      const qrEmployeeStatus = {};
 
 
       // Leave section
@@ -2810,163 +2841,129 @@
 
 
       }
-      // QR SCAN HANDLER – this is where a real QR library would call into
-      function handleQrScan(scannedId) {
-        const id = (scannedId || "").trim();
-        if (!id) {
-          if (qrScanStatus) qrScanStatus.textContent = "No QR value provided.";
-          return;
-        }
-        const emp = employees[id];
-        if (!emp) {
-          if (qrScanStatus) qrScanStatus.textContent = "Unknown QR / staff ID: " + id;
-          return;
-        }
-
-        const status = getEmployeeStatus(id);
-        const type = status.clockedIn ? "out" : "in";
-        const now = new Date();
-
-        attendanceLog.push({
-          user: id,
-          type: type,
-          time: now.toLocaleString(),
-        });
-
-        status.clockedIn = !status.clockedIn;
-
-        if (qrScanStatus) {
-          const actionText = type === "in" ? "Clocked IN" : "Clocked OUT";
-          qrScanStatus.textContent =
-            emp.displayName + " – " + actionText + " at " + now.toLocaleString();
-        }
-
-        renderAttendance();
-        updateAttendanceControls();
-      }
-
-      // CAMERA START – placeholder for real QR library
-      function startQrCamera() {
-        if (qrCameraContainer) {
-          qrCameraContainer.textContent =
-            "Camera scanner started (demo). In production, initialise your QR library here " +
-            "and call handleQrScan(decodedText) whenever a QR code is successfully read.";
-        }
-        if (qrScanStatus) {
-          qrScanStatus.textContent = "Camera scanner ready. Awaiting QR code...";
-        }
-
-        /*
-          Example with html5-qrcode (for when you go real):
-  
-          const html5QrCode = new Html5Qrcode("qr-camera-container");
-          html5QrCode.start(
-            { facingMode: "environment" },
-            { fps: 10, qrbox: 250 },
-            (decodedText) => {
-              handleQrScan(decodedText);   // <--- this updates attendance
-            },
-            (errorMessage) => {
-              // optional: handle scan errors
-            }
-          );
-        */
-      }
 
       // LOGIN LOGIC
+
+      const MOCK_USERS = {
+        "employee1": { id: 1, username: "employee1", displayName: "Sarah Johnson", role: "employee" },
+        "employee2": { id: 2, username: "employee2", displayName: "Michael Chen", role: "employee" },
+        "emp001": { id: 3, username: "emp001", displayName: "Emily Rodriguez", role: "employee" },
+        "hr1": { id: 100, username: "hr1", displayName: "Admin Manager", role: "hr" },
+        "hradmin": { id: 101, username: "hradmin", displayName: "HR Director", role: "hr" }
+      };
+
+      const MOCK_PASSWORDS = {
+        "employee1": "emp123", "employee2": "emp123", "emp001": "emp123",
+        "hr1": "hr123", "hradmin": "hr123"
+      };
+
+      function tryMockLogin(username, password, selectedRole) {
+        const user = MOCK_USERS[username.toLowerCase()];
+        if (!user) return null;
+        if (MOCK_PASSWORDS[username.toLowerCase()] !== password) return null;
+        if (user.role !== selectedRole) return null;
+        return user;
+      }
+
+      function completeLoginUI(user, role) {
+        currentRole = role;
+        currentUser = {
+          role: role,
+          username: user.username,
+          dbId: user.id,
+          displayName: user.displayName,
+          roleId: role === "hr" ? 2 : 1
+        };
+
+        userRoleLabel.textContent = currentRole === "employee" ? "Employee" : "HR / Admin";
+        userNameLabel.textContent = currentUser.displayName;
+
+        const reportsLink = document.querySelector('.nav-link[data-target="reports"]');
+        if (currentRole === "hr") {
+          if (reportsLink) reportsLink.classList.remove("hidden");
+          attendanceEntryBlock.classList.add("hidden");
+          newShiftRequestSection.classList.add("hidden");
+          hrCreateShiftSection.classList.remove("hidden");
+          shiftRequestsHeading.textContent = "All shift requests (this session)";
+          if (leaveFormSection) leaveFormSection.classList.add("hidden");
+        } else {
+          if (reportsLink) reportsLink.classList.add("hidden");
+          attendanceEntryBlock.classList.remove("hidden");
+          hrCreateShiftSection.classList.add("hidden");
+          newShiftRequestSection.classList.remove("hidden");
+          shiftRequestsHeading.textContent = "Your shift requests (this session)";
+          if (leaveFormSection) leaveFormSection.classList.remove("hidden");
+        }
+
+        loginScreen.classList.add("hidden");
+        dashboardScreen.classList.remove("hidden");
+        showView("dashboard");
+
+        renderShifts();
+        renderShiftPools();
+        populateShiftOptions();
+        updateAttendanceControls();
+        renderNotifications();
+        updateReports();
+      }
 
       loginForm.addEventListener("submit", async function (e) {
         e.preventDefault();
 
         const username = document.getElementById("username").value.trim();
         const password = document.getElementById("password").value.trim();
-        const selectedRole = roleSelect.value; // "employee" or "hr" from the UI toggle
+        const selectedRole = roleSelect.value;
 
         loginError.classList.add("hidden");
         loginError.textContent = "";
+
+        if (!username || !password) {
+          loginError.textContent = "Please enter username and password.";
+          loginError.classList.remove("hidden");
+          return;
+        }
 
         try {
           const response = await fetch("/api/auth/login", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            // 🔹 match authController: { userId, password }
             body: JSON.stringify({ userId: username, password })
           });
 
-          if (!response.ok) {
-            const errData = await response.json().catch(() => ({}));
-            loginError.textContent =
-              errData.message || "Invalid credentials. Please check role, username and password.";
-            loginError.classList.remove("hidden");
+          if (response.ok) {
+            const data = await response.json();
+            const user = data.user;
+            const roleFromDb = user.roleId === 2 ? "hr" : "employee";
+            completeLoginUI({
+              id: user.id,
+              username: user.userId,
+              displayName: [user.firstName, user.lastName].filter(Boolean).join(" ") || user.userId
+            }, roleFromDb);
+
+            await loadAttendanceForCurrentUser();
+            await loadLeaveForCurrentUser();
+            if (currentRole === "hr") await loadEmployeesForHr();
+            await loadShiftsForCurrentUser();
+            await loadShiftRequestsForCurrentUser();
             return;
           }
 
-          const data = await response.json();
-          const user = data.user; // this is the payload from authController
-          const roleFromDb = user.roleId === 2 ? "hr" : "employee";
-          const displayNameParts = [user.firstName, user.lastName].filter(Boolean);
-          const displayName = displayNameParts.join(" ") || user.userId;
-
-          currentRole = roleFromDb;
-
-          currentUser = {
-            role: roleFromDb,
-            username: user.userId,     // staff_id style
-            dbId: user.id,             // numeric users.id -> for attendance_logs.user_id
-            displayName: displayName,
-            roleId: user.roleId,
-            departmentId: user.departmentId
-          };
-
-          userRoleLabel.textContent = currentRole === "employee" ? "Employee" : "HR / Admin";
-          userNameLabel.textContent = currentUser.displayName;
-
-          const reportsLink = document.querySelector('.nav-link[data-target="reports"]');
-          if (currentRole === "hr") {
-            if (reportsLink) reportsLink.classList.remove("hidden");
-            attendanceEntryBlock.classList.add("hidden");
-            newShiftRequestSection.classList.add("hidden");
-            hrCreateShiftSection.classList.remove("hidden");
-            shiftRequestsHeading.textContent = "All shift requests (this session)";
-            if (leaveFormSection) leaveFormSection.classList.add("hidden");
-          } else {
-            if (reportsLink) reportsLink.classList.add("hidden");
-            attendanceEntryBlock.classList.remove("hidden");
-            hrCreateShiftSection.classList.add("hidden");
-            newShiftRequestSection.classList.remove("hidden");
-            shiftRequestsHeading.textContent = "Your shift requests (this session)";
-            if (leaveFormSection) leaveFormSection.classList.remove("hidden");
+          const mockUser = tryMockLogin(username, password, selectedRole);
+          if (mockUser) {
+            completeLoginUI(mockUser, mockUser.role);
+            return;
           }
 
-          loginScreen.classList.add("hidden");
-          dashboardScreen.classList.remove("hidden");
-          showView("dashboard");
+          loginError.textContent = "Invalid credentials. Try: employee1/emp123 or hr1/hr123";
+          loginError.classList.remove("hidden");
 
-          // Load existing attendance from DB 
-          await loadAttendanceForCurrentUser();
-          // Load existing leave requests from DB
-          await loadLeaveForCurrentUser();
-
-          // HR: load employees list for the "Select employee" dropdown + reports
-          if (currentRole === "hr") {
-            await loadEmployeesForHr();
-          }
-          // load shifts for current user (both roles)
-          await loadShiftsForCurrentUser();
-
-          // load shift requests for current user
-          await loadShiftRequestsForCurrentUser();
-
-
-          renderShifts();
-          renderShiftPools();
-          populateShiftOptions();
-          updateAttendanceControls();
-          renderNotifications();
-          updateReports();
         } catch (err) {
-          console.error("Login error:", err);
-          loginError.textContent = "Login failed due to a server error.";
+          const mockUser = tryMockLogin(username, password, selectedRole);
+          if (mockUser) {
+            completeLoginUI(mockUser, mockUser.role);
+            return;
+          }
+          loginError.textContent = "Server unavailable. Try: employee1/emp123 or hr1/hr123";
           loginError.classList.remove("hidden");
         }
       });
@@ -3330,18 +3327,147 @@
       // Shift action change -> refresh list of shifts to choose from
       shiftActionSelect.addEventListener("change", populateShiftOptions);
 
-      // QR simulate button
-      if (qrSimBtn) {
-        qrSimBtn.addEventListener("click", function () {
-          handleQrScan(qrSimInput.value);
+      // QR Scanner Functions
+      function getQrEmployeeStatus(empId) {
+        if (!qrEmployeeStatus[empId]) {
+          qrEmployeeStatus[empId] = { clockedIn: false };
+        }
+        return qrEmployeeStatus[empId];
+      }
+
+      function processQrScan(employeeId) {
+        const empId = (employeeId || "").trim().toLowerCase();
+        if (!empId) {
+          qrScanStatus.textContent = "No employee ID provided.";
+          return;
+        }
+
+        let empIdClean = empId;
+        if (empId.startsWith("kronos:")) {
+          const parts = empId.split(":");
+          empIdClean = parts[1] || empId;
+        }
+
+        const mockUser = MOCK_USERS[empIdClean];
+        if (!mockUser) {
+          qrScanStatus.textContent = "Employee not found: " + empIdClean;
+          qrResultDisplay.style.display = "block";
+          qrResultDisplay.style.borderColor = "#ef4444";
+          qrResultIcon.textContent = "✗";
+          qrResultIcon.style.color = "#ef4444";
+          qrResultMessage.textContent = "Employee Not Found";
+          qrResultMessage.style.color = "#ef4444";
+          qrResultTime.textContent = "";
+          qrResultName.textContent = empIdClean;
+          return;
+        }
+
+        const status = getQrEmployeeStatus(empIdClean);
+        const now = new Date();
+        const timeStr = now.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: true });
+        
+        status.clockedIn = !status.clockedIn;
+        const action = status.clockedIn ? "in" : "out";
+
+        qrResultDisplay.style.display = "block";
+        qrResultDisplay.style.borderColor = "#22c55e";
+        qrResultIcon.textContent = "✓";
+        qrResultIcon.style.color = "#22c55e";
+        qrResultMessage.textContent = status.clockedIn ? "Successfully Clocked In!" : "Successfully Clocked Out!";
+        qrResultMessage.style.color = "#22c55e";
+        qrResultTime.textContent = timeStr;
+        qrResultName.textContent = mockUser.displayName;
+        qrScanStatus.textContent = mockUser.displayName + " clocked " + action + " at " + timeStr;
+
+        attendanceLog.push({
+          user: mockUser.username,
+          displayName: mockUser.displayName,
+          type: action,
+          time: now.toLocaleString()
+        });
+        renderAttendance();
+      }
+
+      async function startQrScanner() {
+        try {
+          qrStream = await navigator.mediaDevices.getUserMedia({ 
+            video: { facingMode: "environment" } 
+          });
+          qrVideo.srcObject = qrStream;
+          qrScanning = true;
+          qrStartBtn.disabled = true;
+          qrStopBtn.disabled = false;
+          qrScanFrame.style.display = "block";
+          qrScanStatus.textContent = "Scanner active - point at QR code...";
+          
+          const ctx = qrCanvas.getContext("2d");
+          
+          function scanFrame() {
+            if (!qrScanning) return;
+            
+            if (qrVideo.readyState === qrVideo.HAVE_ENOUGH_DATA) {
+              qrCanvas.width = qrVideo.videoWidth;
+              qrCanvas.height = qrVideo.videoHeight;
+              ctx.drawImage(qrVideo, 0, 0, qrCanvas.width, qrCanvas.height);
+              
+              const imageData = ctx.getImageData(0, 0, qrCanvas.width, qrCanvas.height);
+              const code = jsQR(imageData.data, imageData.width, imageData.height);
+              
+              if (code) {
+                stopQrScanner();
+                processQrScan(code.data);
+                return;
+              }
+            }
+            requestAnimationFrame(scanFrame);
+          }
+          scanFrame();
+          
+        } catch (err) {
+          qrScanStatus.textContent = "Camera error: " + err.message;
+        }
+      }
+
+      function stopQrScanner() {
+        qrScanning = false;
+        if (qrStream) {
+          qrStream.getTracks().forEach(track => track.stop());
+          qrStream = null;
+        }
+        qrVideo.srcObject = null;
+        qrStartBtn.disabled = false;
+        qrStopBtn.disabled = true;
+        qrScanFrame.style.display = "none";
+        qrScanStatus.textContent = "Scanner stopped.";
+      }
+
+      function resetQrResult() {
+        qrResultDisplay.style.display = "none";
+        qrScanStatus.textContent = "Ready for scanning...";
+      }
+
+      if (qrManualBtn) {
+        qrManualBtn.addEventListener("click", function() {
+          processQrScan(qrManualInput.value);
         });
       }
 
-      // QR camera button
-      if (qrCameraBtn) {
-        qrCameraBtn.addEventListener("click", function () {
-          startQrCamera();
+      if (qrManualInput) {
+        qrManualInput.addEventListener("keypress", function(e) {
+          if (e.key === "Enter") processQrScan(qrManualInput.value);
         });
+      }
+
+      if (qrStartBtn) {
+        qrStartBtn.addEventListener("click", startQrScanner);
+      }
+
+      if (qrStopBtn) {
+        qrStopBtn.addEventListener("click", stopQrScanner);
+      }
+
+      if (qrNewScanBtn) {
+        qrNewScanBtn.addEventListener("click", resetQrResult);
       }
 
       // Initial state

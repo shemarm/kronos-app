@@ -538,69 +538,75 @@
     togglePasswordBtn.setAttribute("aria-label", isPassword ? "Hide password" : "Show password");
   });
 
+  // Mock credentials
+  const MOCK_USERS = {
+    "employee1": { id: 1, username: "employee1", displayName: "Sarah Johnson", role: "employee" },
+    "employee2": { id: 2, username: "employee2", displayName: "Michael Chen", role: "employee" },
+    "emp001": { id: 3, username: "emp001", displayName: "Emily Rodriguez", role: "employee" },
+    "hr1": { id: 100, username: "hr1", displayName: "Admin Manager", role: "hr" },
+    "hradmin": { id: 101, username: "hradmin", displayName: "HR Director", role: "hr" }
+  };
+  const MOCK_PASSWORDS = {
+    "employee1": "emp123", "employee2": "emp123", "emp001": "emp123",
+    "hr1": "hr123", "hradmin": "hr123"
+  };
+
   // Login handler
-loginForm.addEventListener("submit", async function (e) {
-  e.preventDefault();
-  errorMsg.textContent = "";
+  loginForm.addEventListener("submit", async function (e) {
+    e.preventDefault();
+    errorMsg.textContent = "";
 
-  const userInput = usernameEl.value.trim();
-  const passInput = passwordEl.value;
+    const userInput = usernameEl.value.trim();
+    const passInput = passwordEl.value;
 
-  if (!userInput || !passInput) {
-    errorMsg.textContent = "Please enter your username and password.";
-    return;
-  }
-
-  try {
-    const response = await fetch("/api/auth/login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        userId: userInput,
-        password: passInput
-      })
-    });
-
-    let data = null;
-    try {
-      data = await response.json();
-    } catch (err) {
-      data = null;
-    }
-
-    if (!response.ok) {
-      const msg = data && data.message ? data.message : "Invalid username or password.";
-      errorMsg.textContent = msg;
+    if (!userInput || !passInput) {
+      errorMsg.textContent = "Please enter your username and password.";
       return;
     }
 
-    const user = data && data.user ? data.user : data;
-
-    // Derive a frontend role string from the backend user data
-    // Assumes roleId 2 = HR, everything else = employee
-    const derivedRole =
-      user && (user.roleId === 2 || user.role === "hr" || user.role === "HR")
-        ? "hr"
-        : "employee";
-
     try {
-      if (user) {
-         user.dbId = user.id; 
-        localStorage.setItem("kronosUser", JSON.stringify(user));
-      }
-      localStorage.setItem("kronosRole", derivedRole);
-    } catch (err) {
-      console.warn("Could not persist login", err);
-    }
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: userInput, password: passInput })
+      });
 
-    window.location.href = "kronos_dashboard.html"; // must match the dashboard file name
-  } catch (err) {
-    console.error("Login error:", err);
-    errorMsg.textContent = "Unable to reach the server. Please try again.";
-  }
-});
+      if (response.ok) {
+        let data = await response.json();
+        const user = data && data.user ? data.user : data;
+        const derivedRole = user && (user.roleId === 2 || user.role === "hr") ? "hr" : "employee";
+        if (user) {
+          user.dbId = user.id;
+          localStorage.setItem("kronosUser", JSON.stringify(user));
+        }
+        localStorage.setItem("kronosRole", derivedRole);
+        window.location.href = "kronos_dashboard.html";
+        return;
+      }
+
+      // Try mock login
+      const mockUser = MOCK_USERS[userInput.toLowerCase()];
+      if (mockUser && MOCK_PASSWORDS[userInput.toLowerCase()] === passInput && mockUser.role === currentRole) {
+        localStorage.setItem("kronosUser", JSON.stringify(mockUser));
+        localStorage.setItem("kronosRole", mockUser.role);
+        window.location.href = "kronos_dashboard.html";
+        return;
+      }
+
+      errorMsg.textContent = "Invalid credentials. Try: employee1/emp123 or hr1/hr123";
+
+    } catch (err) {
+      // Server unavailable - try mock
+      const mockUser = MOCK_USERS[userInput.toLowerCase()];
+      if (mockUser && MOCK_PASSWORDS[userInput.toLowerCase()] === passInput && mockUser.role === currentRole) {
+        localStorage.setItem("kronosUser", JSON.stringify(mockUser));
+        localStorage.setItem("kronosRole", mockUser.role);
+        window.location.href = "kronos_dashboard.html";
+        return;
+      }
+      errorMsg.textContent = "Server unavailable. Try: employee1/emp123 or hr1/hr123";
+    }
+  });
 </script>
 </body>
 </html>

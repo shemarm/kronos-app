@@ -1,27 +1,19 @@
 // backend/src/routes/shiftRoutes.js
 const express = require("express");
-
 const {
-  createShiftHandler,
-  getUserShiftsHandler,
+  getUserShifts,
   getAvailableShiftsHandler,
-  getAllShiftsHandler,
-  setShiftStatusHandler,
+  createShift,
+  deleteShift,
 } = require("../controllers/shiftController");
 
 const router = express.Router();
 
 /**
- * HR: create new shift
- * POST /api/shifts
- */
-router.post("/", createShiftHandler);
-
-/**
  * Employee: see their shifts
  * GET /api/shifts/user/:userId
  */
-router.get("/user/:userId", getUserShiftsHandler);
+router.get("/user/:userId", getUserShifts);
 
 /**
  * Get AVAILABLE shifts (anyone)
@@ -30,15 +22,16 @@ router.get("/user/:userId", getUserShiftsHandler);
 router.get("/available", getAvailableShiftsHandler);
 
 /**
- * HR: get all shifts
- * GET /api/shifts
+ * HR: create new shift
+ * POST /api/shifts
  */
-router.get("/", getAllShiftsHandler);
+router.post("/", createShift);
 
 /**
- * HR: update shift status (and optionally assignment)
- * PATCH /api/shifts/:id/status
+ * HR: delete shift
+ * DELETE /api/shifts/:id
  */
-router.patch("/:id/status", setShiftStatusHandler);
+router.delete("/:id", deleteShift);
+
 
 module.exports = router;

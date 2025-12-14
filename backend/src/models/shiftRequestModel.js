@@ -94,12 +94,15 @@ async function getAllShiftRequests() {
       u.last_name     AS employee_last_name,
       au.user_id      AS approver_staff_id,
       au.first_name   AS approver_first_name,
-      au.last_name    AS approver_last_name
+      au.last_name    AS approver_last_name,
+      s.description   AS shift_description
     FROM shift_requests sr
     JOIN users u
       ON u.id = sr.user_id
     LEFT JOIN users au
       ON au.id = sr.approved_by
+    LEFT JOIN shifts s
+      ON s.id = sr.shift_id
     ORDER BY sr.created_at DESC, sr.id DESC
     `
   );
@@ -107,7 +110,9 @@ async function getAllShiftRequests() {
 }
 
 /**
- * HR: update status of shift request, set approved_by/approved_at if needed.
+ * HR: update status of shift request AND handle shift assignment.
+ * When PICK_UP or TRADE is APPROVED, assign the shift to the requesting user.
+ * When DROP is APPROVED, unassign the shift (set assigned_to_id = NULL).
  */
 async function updateShiftRequestStatus({ requestId, status, approverId }) {
   const statusUpper = status.toUpperCase();
@@ -115,6 +120,15 @@ async function updateShiftRequestStatus({ requestId, status, approverId }) {
   if (!allowed.includes(statusUpper)) {
     throw new Error("Invalid shift request status");
   }
+
+  // First, get the shift request details
+  const reqResult = await pool.query(
+    `SELECT id, user_id, shift_id, request_type FROM shift_requests WHERE id = $1`,
+    [requestId]
+  );
+
+  if (reqResult.rowCount === 0) return null;
+  const shiftReq = reqResult.rows[0];
 
   let query;
   let values;
@@ -142,7 +156,61 @@ async function updateShiftRequestStatus({ requestId, status, approverId }) {
         approved_at
     `;
     values = [statusUpper, requestId];
+  } else if (statusUpper === "APPROVED") {
+    // Handle shift assignment based on request type
+    const requestType = (shiftReq.request_type || "").toUpperCase();
+    
+    let shiftUpdateQuery = "";
+    let shiftUpdateValues = [];
+
+    if (requestType === "PICK_UP" || requestType === "TRADE") {
+      // Assign shift to the requesting user
+      shiftUpdateQuery = `
+        UPDATE shifts
+        SET assigned_to_id = $1, updated_at = NOW()
+        WHERE id = $2
+      `;
+      shiftUpdateValues = [shiftReq.user_id, shiftReq.shift_id];
+    } else if (requestType === "DROP") {
+      // Unassign shift (set to NULL)
+      shiftUpdateQuery = `
+        UPDATE shifts
+        SET assigned_to_id = NULL, updated_at = NOW()
+        WHERE id = $1
+      `;
+      shiftUpdateValues = [shiftReq.shift_id];
+    }
+
+    // Execute shift update if needed
+    if (shiftUpdateQuery) {
+      await pool.query(shiftUpdateQuery, shiftUpdateValues);
+    }
+
+    // Update the shift request
+    query = `
+      UPDATE shift_requests
+      SET
+        status      = $1,
+        approved_by = $2,
+        approved_at = NOW(),
+        updated_at  = NOW()
+      WHERE id = $3
+      RETURNING
+        id,
+        user_id,
+        shift_id,
+        request_type,
+        note,
+        status,
+        source,
+        created_at,
+        updated_at,
+        approved_by,
+        approved_at
+    `;
+    values = [statusUpper, approverId, requestId];
   } else {
+    // REJECTED
     query = `
       UPDATE shift_requests
       SET

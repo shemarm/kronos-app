@@ -1,87 +1,40 @@
 // backend/src/controllers/shiftController.js
 const {
-  createShift,
   getShiftsForUser,
   getAvailableShifts,
-  getAllShifts,
+  createShift: createShiftModel,
   updateShiftStatus,
+  deleteShift: deleteShiftModel,
 } = require("../models/shiftModel");
 
 /**
- * HR: create a new shift.
- * Body:
- * {
- *   description: string (required)
- *   departmentId?: number
- *   startTime?: string (ISO timestamp) | null
- *   endTime?: string (ISO timestamp) | null
- *   location?: string
- *   assignedToId?: number   // users.id
- *   createdBy?: number      // HR user id (for now passed in body)
- *   status?: "AVAILABLE" | "ASSIGNED" | "COMPLETED" | "CANCELLED"
- * }
- */
-async function createShiftHandler(req, res) {
-  try {
-    const {
-      description,
-      departmentId,
-      startTime,
-      endTime,
-      location,
-      assignedToId,
-      createdBy,
-      status,
-    } = req.body;
-
-    if (!description) {
-      return res.status(400).json({ message: "Description is required" });
-    }
-
-    const shift = await createShift({
-      description,
-      departmentId: departmentId || null,
-      startTime: startTime || null,
-      endTime: endTime || null,
-      location: location || null,
-      assignedToId: assignedToId || null,
-      createdBy: createdBy || null,
-      status: status || null,
-    });
-
-    return res.status(201).json({ shift });
-  } catch (err) {
-    console.error("createShiftHandler error:", err);
-    return res.status(500).json({ message: "Failed to create shift" });
-  }
-}
-
-/**
- * Employee: get their own assigned shifts.
+ * Get shifts assigned to a specific user.
  * GET /api/shifts/user/:userId
  */
-async function getUserShiftsHandler(req, res) {
+async function getUserShifts(req, res) {
   try {
     const userId = parseInt(req.params.userId, 10);
     if (!userId || Number.isNaN(userId)) {
-      return res.status(400).json({ message: "Invalid userId parameter" });
+      return res.status(400).json({ message: "Invalid user ID" });
     }
 
     const shifts = await getShiftsForUser(userId);
     return res.json({ shifts });
   } catch (err) {
-    console.error("getUserShiftsHandler error:", err);
+    console.error("getUserShifts error:", err);
     return res.status(500).json({ message: "Failed to fetch user shifts" });
   }
 }
 
 /**
  * Get all AVAILABLE shifts.
- * GET /api/shifts/available
+ * GET /api/shifts/available?userId=1
  */
 async function getAvailableShiftsHandler(req, res) {
   try {
-    const shifts = await getAvailableShifts();
+    const userIdQuery = req.query.userId ? parseInt(req.query.userId, 10) : null;
+
+    const shifts = await getAvailableShifts(userIdQuery);
     return res.json({ shifts });
   } catch (err) {
     console.error("getAvailableShiftsHandler error:", err);
@@ -90,64 +43,51 @@ async function getAvailableShiftsHandler(req, res) {
 }
 
 /**
- * HR: get ALL shifts (regardless of status).
- * GET /api/shifts
+ * HR: create new shift
+ * POST /api/shifts
+ * Body: { description, assignedToId (optional), status }
  */
-async function getAllShiftsHandler(req, res) {
+async function createShift(req, res) {
   try {
-    const shifts = await getAllShifts();
-    return res.json({ shifts });
+    const { description, assignedToId, status = "AVAILABLE" } = req.body;
+    if (!description || description.trim() === "") {
+      return res.status(400).json({ message: "Shift description is required" });
+    }
+
+    const shift = await createShiftModel({
+      description: description.trim(),
+      assignedToId: assignedToId || null,
+      status,
+      createdBy: req.user?.id || null, // optional, if auth available
+    });
+
+    if (!shift) return res.status(500).json({ message: "Failed to create shift" });
+
+    return res.status(201).json({ message: "Shift created successfully", shift });
   } catch (err) {
-    console.error("getAllShiftsHandler error:", err);
-    return res.status(500).json({ message: "Failed to fetch shifts" });
+    console.error("createShift error:", err);
+    return res.status(500).json({ message: "Failed to create shift: " + err.message });
   }
 }
 
-/**
- * HR: update a shift's status (and optionally whose shift it is).
- * PATCH /api/shifts/:id/status
- * Body:
- * {
- *   status: "AVAILABLE" | "ASSIGNED" | "COMPLETED" | "CANCELLED",
- *   assignedToId?: number
- * }
- */
-async function setShiftStatusHandler(req, res) {
+async function deleteShift(req, res) {
   try {
-    const shiftId = parseInt(req.params.id, 10);
-    if (!shiftId || Number.isNaN(shiftId)) {
-      return res.status(400).json({ message: "Invalid shift id parameter" });
+    const id = parseInt(req.params.id, 10);
+    if (!id || Number.isNaN(id)) {
+      return res.status(400).json({ message: "Invalid shift id" });
     }
-
-    const { status, assignedToId } = req.body || {};
-    if (!status) {
-      return res.status(400).json({ message: "status is required" });
-    }
-
-    const updated = await updateShiftStatus({
-      shiftId,
-      status,
-      assignedToId: assignedToId || null,
-    });
-
-    if (!updated) {
-      return res.status(404).json({ message: "Shift not found" });
-    }
-
-    return res.json({ shift: updated });
+    const ok = await deleteShiftModel(id);
+    if (!ok) return res.status(404).json({ message: "Shift not found" });
+    return res.json({ message: "Shift deleted" });
   } catch (err) {
-    console.error("setShiftStatusHandler error:", err);
-    if (err.message === "Invalid shift status") {
-      return res.status(400).json({ message: "Invalid shift status" });
-    }
-    return res.status(500).json({ message: "Failed to update shift status" });
+    console.error("deleteShift error:", err);
+    return res.status(500).json({ message: "Failed to delete shift: " + err.message });
   }
 }
 
 module.exports = {
-  createShiftHandler,
-  getUserShiftsHandler,
+  getUserShifts,
   getAvailableShiftsHandler,
-  getAllShiftsHandler,
-  setShiftStatusHandler,
+  createShift,
+  deleteShift,
 };

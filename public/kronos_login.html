@@ -276,55 +276,53 @@
       padding: 2px;
     }
 
-    .toggle-password:focus {
-      outline: none;
-    }
-
     .login-row {
       display: flex;
-      align-items: center;
       justify-content: space-between;
+      align-items: center;
+      gap: 6px;
       font-size: 11px;
-      margin-top: 4px;
-      margin-bottom: 6px;
       color: var(--text-muted);
     }
 
     .btn-primary {
-      margin-top: 2px;
-      border-radius: 999px;
-      border: none;
-      padding: 8px 14px;
+      border-radius: 12px;
+      border: 1px solid rgba(148, 163, 184, 0.9);
+      background: linear-gradient(135deg, rgba(56, 189, 248, 0.28) 0, rgba(37, 99, 235, 0.30) 100%);
+      color: var(--text-main);
+      padding: 9px 16px;
       font-size: 13px;
-      font-weight: 500;
+      font-weight: 600;
       cursor: pointer;
-      background: linear-gradient(135deg, #38bdf8, #2563eb);
-      color: #e5f0ff;
-      display: inline-flex;
+      display: flex;
       align-items: center;
       justify-content: center;
       gap: 6px;
-      box-shadow: 0 12px 32px rgba(37, 99, 235, 0.75);
+      transition: all 0.2s ease;
+      box-shadow: 0 8px 20px rgba(37, 99, 235, 0.35);
     }
 
-    .btn-primary span {
-      font-size: 15px;
+    .btn-primary:hover {
+      background: linear-gradient(135deg, rgba(56, 189, 248, 0.38) 0, rgba(37, 99, 235, 0.40) 100%);
+      transform: translateY(-1px);
+      box-shadow: 0 12px 28px rgba(37, 99, 235, 0.5);
     }
 
     .login-note {
-      margin-top: 8px;
       font-size: 11px;
       color: var(--text-muted);
+      text-align: center;
+      padding-top: 4px;
     }
 
     .error-msg {
-      margin-top: 4px;
-      font-size: 11px;
-      color: #fca5a5;
-      min-height: 14px;
+      font-size: 12px;
+      color: #f87171;
+      text-align: center;
+      min-height: 18px;
     }
 
-    @media (max-width: 860px) {
+    @media (max-width: 800px) {
       .login-card {
         grid-template-columns: minmax(0, 1fr);
       }
@@ -353,7 +351,7 @@
       </div>
     </div>
     <div class="brand-right">
-      St. Ann’s Bay Regional Hospital<br/>
+      St. Ann's Bay Regional Hospital<br/>
       <span style="opacity:0.8;">Digital Attendance Portal</span>
     </div>
   </header>
@@ -372,7 +370,7 @@
         <li>Submit leave and missed punch requests.</li>
       </ul>
       <div class="login-aside-foot">
-        By signing in, you confirm that you are an authorized user of the hospital’s
+        By signing in, you confirm that you are an authorized user of the hospital's
         attendance and scheduling system.
       </div>
     </aside>
@@ -464,13 +462,22 @@
     }
   };
 
-  // Demo credentials per role (commented out)
-  /*
-  const credentials = {
-    employee: { username: "emp1",   password: "emp123"   },
-    hr:       { username: "hr1",    password: "hr123"    }
+  // Mock credentials for testing (fallback when server is unavailable)
+  const MOCK_USERS = {
+    "employee1": { id: 1, username: "employee1", displayName: "Sarah Johnson", role: "employee", roleId: 1 },
+    "employee2": { id: 2, username: "employee2", displayName: "Michael Chen", role: "employee", roleId: 1 },
+    "emp001": { id: 3, username: "emp001", displayName: "Emily Rodriguez", role: "employee", roleId: 1 },
+    "hr1": { id: 100, username: "hr1", displayName: "Admin Manager", role: "hr", roleId: 2 },
+    "hradmin": { id: 101, username: "hradmin", displayName: "HR Director", role: "hr", roleId: 2 }
   };
-  */
+  
+  const MOCK_PASSWORDS = {
+    "employee1": "emp123", 
+    "employee2": "emp123", 
+    "emp001": "emp123",
+    "hr1": "hr123", 
+    "hradmin": "hr123"
+  };
 
   const roleTabs   = document.querySelectorAll(".role-tab");
   const formTitle  = document.getElementById("formTitle");
@@ -538,20 +545,20 @@
     togglePasswordBtn.setAttribute("aria-label", isPassword ? "Hide password" : "Show password");
   });
 
-  // Mock credentials
-  const MOCK_USERS = {
-    "employee1": { id: 1, username: "employee1", displayName: "Sarah Johnson", role: "employee" },
-    "employee2": { id: 2, username: "employee2", displayName: "Michael Chen", role: "employee" },
-    "emp001": { id: 3, username: "emp001", displayName: "Emily Rodriguez", role: "employee" },
-    "hr1": { id: 100, username: "hr1", displayName: "Admin Manager", role: "hr" },
-    "hradmin": { id: 101, username: "hradmin", displayName: "HR Director", role: "hr" }
-  };
-  const MOCK_PASSWORDS = {
-    "employee1": "emp123", "employee2": "emp123", "emp001": "emp123",
-    "hr1": "hr123", "hradmin": "hr123"
-  };
+  // Helper function for mock authentication
+  function attemptMockLogin(userInput, passInput) {
+    const mockUser = MOCK_USERS[userInput.toLowerCase()];
+    if (mockUser && MOCK_PASSWORDS[userInput.toLowerCase()] === passInput && mockUser.role === currentRole) {
+      mockUser.dbId = mockUser.id;
+      localStorage.setItem("kronosUser", JSON.stringify(mockUser));
+      localStorage.setItem("kronosRole", mockUser.role);
+      window.location.href = "kronos_dashboard.html";
+      return true;
+    }
+    return false;
+  }
 
-  // Login handler
+  // Login handler - tries API first, falls back to mock credentials
   loginForm.addEventListener("submit", async function (e) {
     e.preventDefault();
     errorMsg.textContent = "";
@@ -565,46 +572,67 @@
     }
 
     try {
+      // Attempt API authentication first
       const response = await fetch("/api/auth/login", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId: userInput, password: passInput })
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          userId: userInput,
+          password: passInput
+        })
       });
 
+      let data = null;
+      try {
+        data = await response.json();
+      } catch (err) {
+        data = null;
+      }
+
       if (response.ok) {
-        let data = await response.json();
+        // API authentication successful
         const user = data && data.user ? data.user : data;
-        const derivedRole = user && (user.roleId === 2 || user.role === "hr") ? "hr" : "employee";
-        if (user) {
-          user.dbId = user.id;
-          localStorage.setItem("kronosUser", JSON.stringify(user));
+
+        // Derive a frontend role string from the backend user data
+        const derivedRole =
+          user && (user.roleId === 2 || user.role === "hr" || user.role === "HR")
+            ? "hr"
+            : "employee";
+
+        try {
+          if (user) {
+            user.dbId = user.id;
+            localStorage.setItem("kronosUser", JSON.stringify(user));
+          }
+          localStorage.setItem("kronosRole", derivedRole);
+        } catch (err) {
+          console.warn("Could not persist login", err);
         }
-        localStorage.setItem("kronosRole", derivedRole);
+
         window.location.href = "kronos_dashboard.html";
         return;
       }
 
-      // Try mock login
-      const mockUser = MOCK_USERS[userInput.toLowerCase()];
-      if (mockUser && MOCK_PASSWORDS[userInput.toLowerCase()] === passInput && mockUser.role === currentRole) {
-        localStorage.setItem("kronosUser", JSON.stringify(mockUser));
-        localStorage.setItem("kronosRole", mockUser.role);
-        window.location.href = "kronos_dashboard.html";
+      // API returned error - try mock authentication
+      if (attemptMockLogin(userInput, passInput)) {
         return;
       }
 
-      errorMsg.textContent = "Invalid credentials. Try: employee1/emp123 or hr1/hr123";
+      // Neither API nor mock succeeded
+      const msg = data && data.message ? data.message : "Invalid username or password.";
+      errorMsg.textContent = msg + " (Try: employee1/emp123 or hr1/hr123)";
 
     } catch (err) {
-      // Server unavailable - try mock
-      const mockUser = MOCK_USERS[userInput.toLowerCase()];
-      if (mockUser && MOCK_PASSWORDS[userInput.toLowerCase()] === passInput && mockUser.role === currentRole) {
-        localStorage.setItem("kronosUser", JSON.stringify(mockUser));
-        localStorage.setItem("kronosRole", mockUser.role);
-        window.location.href = "kronos_dashboard.html";
+      // Server unavailable - try mock authentication
+      console.error("Login error:", err);
+      
+      if (attemptMockLogin(userInput, passInput)) {
         return;
       }
-      errorMsg.textContent = "Server unavailable. Try: employee1/emp123 or hr1/hr123";
+
+      errorMsg.textContent = "Server unavailable. Try mock credentials: employee1/emp123 or hr1/hr123";
     }
   });
 </script>

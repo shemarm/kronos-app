@@ -44,13 +44,9 @@ app.use('/api/shift-requests', shiftRequestRoutes);
 
 // Default route -> login page
 app.get("/", (req, res) => {
-  res.sendFile(path.join(publicPath, "kronos_login.html"));
-});
-
-// Dashboard route
-app.get("/dashboard", (req, res) => {
   res.sendFile(path.join(publicPath, "kronos_dashboard.html"));
 });
+
 
 // Error handler (must be last)
 // app.use(errorHandler);

@@ -2,8 +2,10 @@
 const {
   insertAttendanceLog,
   getAttendanceLogsByUser,
+  getAllAttendanceLogsByUser,
   getRecentAttendanceLogs,
-  getLogsForHours 
+  getWorkHoursByUser,
+  getTotalHoursByDate
 } = require("../models/attendanceModel");
 
 /**
@@ -20,6 +22,7 @@ async function logAttendance(req, res) {
       });
     }
 
+    // Normalise "in"/"out" to "IN"/"OUT" for the CHECK constraint
     const eventType = String(action).toUpperCase();
     if (eventType !== "IN" && eventType !== "OUT") {
       return res.status(400).json({
@@ -27,6 +30,7 @@ async function logAttendance(req, res) {
       });
     }
 
+    // For self-service, we treat created_by as the same user.
     const createdBy = userId;
 
     const log = await insertAttendanceLog({
@@ -48,12 +52,14 @@ async function logAttendance(req, res) {
 }
 
 /**
- * GET /api/attendance/user/:userId?limit=50
+ * GET /api/attendance/user/:userId?days=7&date=2025-12-10
+ * Get attendance logs, optionally filtered by date
  */
 async function getUserAttendance(req, res) {
   try {
     const userId = Number(req.params.userId);
-    const limit = req.query.limit ? Number(req.query.limit) : 50;
+    const days = req.query.days ? Number(req.query.days) : 7;
+    const date = req.query.date || null;
 
     if (!userId || Number.isNaN(userId)) {
       return res.status(400).json({
@@ -61,10 +67,35 @@ async function getUserAttendance(req, res) {
       });
     }
 
-    const logs = await getAttendanceLogsByUser(userId, limit);
+    const logs = await getAttendanceLogsByUser(userId, { days, date });
     return res.json({ logs });
   } catch (err) {
     console.error("getUserAttendance error:", err);
+    return res.status(500).json({
+      message: "Failed to fetch attendance",
+      detail: err.message
+    });
+  }
+}
+
+/**
+ * GET /api/attendance/user/:userId/all
+ * Get ALL attendance logs for modal
+ */
+async function getAllUserAttendance(req, res) {
+  try {
+    const userId = Number(req.params.userId);
+
+    if (!userId || Number.isNaN(userId)) {
+      return res.status(400).json({
+        message: "Valid numeric userId param is required"
+      });
+    }
+
+    const logs = await getAllAttendanceLogsByUser(userId);
+    return res.json({ logs });
+  } catch (err) {
+    console.error("getAllUserAttendance error:", err);
     return res.status(500).json({
       message: "Failed to fetch attendance",
       detail: err.message
@@ -79,7 +110,8 @@ async function getUserAttendance(req, res) {
 async function getRecentAttendance(req, res) {
   try {
     const limit = req.query.limit ? Number(req.query.limit) : 100;
-    const logs = await getRecentAttendanceLogs(limit);
+    const days = req.query.days ? Number(req.query.days) : null;
+    const logs = await getRecentAttendanceLogs({ limit, days });
     return res.json({ logs });
   } catch (err) {
     console.error("getRecentAttendance error:", err);
@@ -91,119 +123,66 @@ async function getRecentAttendance(req, res) {
 }
 
 /**
- * GET /api/attendance/user/:id/hours
- * Calculate work hours by pairing IN/OUT events
+ * GET /api/attendance/user/:userId/hours?days=7
+ * Fetch the total hours worked for a specific user.
  */
-async function calculateWorkHours(req, res) {
+async function getUserWorkHours(req, res) {
   try {
-    const userId = Number(req.params.id);
-    if (!userId) {
-      return res.status(400).json({ message: "Invalid user id" });
+    const userId = Number(req.params.userId);
+    const days = req.query.days ? Number(req.query.days) : 7;
+
+    if (!userId || Number.isNaN(userId)) {
+      return res.status(400).json({
+        message: "Valid numeric userId param is required"
+      });
     }
 
-    // Fetch logs sorted oldest → newest
-    const logs = await getLogsForHours(userId);
+    const totalHours = await getWorkHoursByUser(userId, { days });
 
-    const days = {};
-    let i = 0;
+    return res.json({
+      totalHours: parseFloat(totalHours).toFixed(2)
+    });
+  } catch (err) {
+    console.error("getUserWorkHours error:", err);
+    return res.status(500).json({
+      message: "Failed to fetch work hours",
+      detail: err.message
+    });
+  }
+}
 
-    while (i < logs.length) {
-      const log = logs[i];
+/**
+ * GET /api/attendance/user/:userId/total-hours?date=2025-12-10
+ * or ?startDate=2025-12-01&endDate=2025-12-10
+ * Get total hours worked for a date or date range
+ */
+async function getUserTotalHours(req, res) {
+  try {
+    const userId = Number(req.params.userId);
+    const date = req.query.date || null;
+    const startDate = req.query.startDate || null;
+    const endDate = req.query.endDate || null;
 
-      // Only process IN events
-      if (log.event_type === "IN") {
-        const clockInTime = new Date(log.recorded_at);
-        const day = clockInTime.toISOString().slice(0, 10); // YYYY-MM-DD
-        
-        // Initialize day if new
-        if (!days[day]) {
-          days[day] = {
-            totalHours: 0,
-            incomplete: false,
-            clockInTime: null,
-            clockOutTime: null
-          };
-        }
-
-        // Store first clock-in of the day if not set
-        if (!days[day].clockInTime) {
-          days[day].clockInTime = clockInTime;
-        }
-
-        const next = logs[i + 1];
-
-        // Check if next log is an OUT on the same or later time
-        if (next && next.event_type === "OUT") {
-          const clockOutTime = new Date(next.recorded_at);
-          
-          // Calculate duration in milliseconds, then convert to hours
-          const durationMs = clockOutTime - clockInTime;
-          const durationHours = durationMs / (1000 * 60 * 60);
-
-          days[day].totalHours += durationHours;
-          days[day].clockOutTime = clockOutTime; // Track last clock-out
-          
-          i += 2; // Skip both IN and OUT
-        } else {
-          // Orphaned IN (no matching OUT)
-          days[day].incomplete = true;
-          i += 1;
-        }
-      } else {
-        // Skip orphaned OUT
-        i += 1;
-      }
+    if (!userId || Number.isNaN(userId)) {
+      return res.status(400).json({
+        message: "Valid numeric userId param is required"
+      });
     }
 
-    // Convert to array and format for frontend
-    const dayList = Object.entries(days).map(([date, info]) => {
-      // Format times for display (24-hour format)
-      const clockIn = info.clockInTime 
-        ? info.clockInTime.toLocaleTimeString('en-US', { 
-            hour12: false, 
-            hour: '2-digit', 
-            minute: '2-digit' 
-          })
-        : '--:--';
-      
-      const clockOut = info.clockOutTime && !info.incomplete
-        ? info.clockOutTime.toLocaleTimeString('en-US', { 
-            hour12: false, 
-            hour: '2-digit', 
-            minute: '2-digit' 
-          })
-        : '-';
-
-      return {
-        date,
-        clockIn,
-        clockOut,
-        totalHours: Number(info.totalHours.toFixed(2)),
-        incomplete: info.incomplete
-      };
-    }).sort((a, b) => new Date(b.date) - new Date(a.date)); // Most recent first
-
-    // Calculate weekly total (last 7 days)
-    const weekAgo = new Date();
-    weekAgo.setDate(weekAgo.getDate() - 7);
-
-    const weeklyTotal = dayList.reduce((sum, d) => {
-      const dayDate = new Date(d.date);
-      // Include all hours (even incomplete days show partial work)
-      return (dayDate >= weekAgo) ? sum + d.totalHours : sum;
-    }, 0);
+    const totalHours = await getTotalHoursByDate(userId, { date, startDate, endDate });
 
     return res.json({
       userId,
-      weeklyTotal: Number(weeklyTotal.toFixed(2)),
-      days: dayList
+      date,
+      startDate,
+      endDate,
+      totalHours: parseFloat(totalHours).toFixed(2)
     });
-
   } catch (err) {
-    console.error("Work hours calculation error:", err);
-    return res.status(500).json({ 
-      message: "Failed to calculate work hours",
-      detail: err.message 
+    console.error("getUserTotalHours error:", err);
+    return res.status(500).json({
+      message: "Failed to fetch total hours",
+      detail: err.message
     });
   }
 }
@@ -211,6 +190,8 @@ async function calculateWorkHours(req, res) {
 module.exports = {
   logAttendance,
   getUserAttendance,
+  getAllUserAttendance,
   getRecentAttendance,
-  calculateWorkHours 
+  getUserWorkHours,
+  getUserTotalHours
 };

@@ -5,21 +5,28 @@ const router = express.Router();
 const {
   logAttendance,
   getUserAttendance,
+  getAllUserAttendance,
   getRecentAttendance,
-  calculateWorkHours
+  getUserWorkHours,
+  getUserTotalHours
 } = require("../controllers/attendanceController");
 
 // POST /api/attendance
 router.post("/", logAttendance);
 
-// GET /api/attendance/user/:userId?limit=50
+// GET /api/attendance/user/:userId?days=7
 router.get("/user/:userId", getUserAttendance);
 
-// GET /api/attendance/recent?limit=100  (optional HR overview)
+// GET /api/attendance/user/:userId/all (for modal)
+router.get("/user/:userId/all", getAllUserAttendance);
+
+// GET /api/attendance/recent?limit=100
 router.get("/recent", getRecentAttendance);
 
-// GET /api/attendance/user/:id/hours  (Track Work Hours)
-router.get("/user/:id/hours", calculateWorkHours);
+// GET /api/attendance/user/:userId/hours?days=7
+router.get("/user/:userId/hours", getUserWorkHours);
 
+// GET /api/attendance/user/:userId/total-hours?date=2025-12-10
+router.get("/user/:userId/total-hours", getUserTotalHours);
 
 module.exports = router;

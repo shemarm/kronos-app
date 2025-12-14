@@ -820,108 +820,9 @@
 <body>
   <div id="app">
     <!-- LOGIN SCREEN -->
-    <section id="login-screen">
-      <div id="login-shell" class="login-shell" data-role="employee">
-        <!-- LEFT PANEL -->
-        <div class="login-panel login-panel-left">
-          <div>
-            <div class="login-brand-row">
-              <div class="login-brand">
-                <div class="brand-logo">KR</div>
-                <div>
-                  <div class="brand-text-main">K.R.O.N.O.S</div>
-                  <div class="brand-text-sub">
-                    Knowledge-driven Recording of Operations, Notifications &amp; Organized Schedules
-                  </div>
-                </div>
-              </div>
-              <div class="login-hospital-tag">
-                St. Ann’s Bay Regional Hospital<br />
-                Digital Attendance Portal
-              </div>
-            </div>
-
-            <div id="left-copy-employee">
-              <div class="left-section-title">Secure access</div>
-              <div class="left-main-heading">Employee portal</div>
-              <div class="left-subtext">
-                Sign in to view shifts, clock-in history and leave balances.
-              </div>
-              <ul class="left-list">
-                <li>Real-time QR attendance tracking.</li>
-                <li>View upcoming shifts and work hours.</li>
-                <li>Submit leave and missed punch requests.</li>
-              </ul>
-            </div>
-
-            <div id="left-copy-hr" class="hidden">
-              <div class="left-section-title">Secure access</div>
-              <div class="left-main-heading">HR &amp; Management console</div>
-              <div class="left-subtext">
-                Analyze presence patterns, investigate exceptions and manage staffing.
-              </div>
-              <ul class="left-list">
-                <li>View lateness, absences and overtime patterns.</li>
-                <li>Approve or reject leave and correction requests.</li>
-                <li>Manage shifts, departments and staff allocations.</li>
-              </ul>
-            </div>
-          </div>
-
-          <div class="left-footer">
-            By signing in, you confirm that you are an authorized user of the hospital’s attendance and scheduling
-            system.
-          </div>
-        </div>
-
-        <!-- RIGHT PANEL -->
-        <div class="login-panel login-panel-right">
-          <div class="right-inner">
-            <div class="role-toggle">
-              <button id="toggle-employee" class="role-pill active">Employee</button>
-              <button id="toggle-hr" class="role-pill">HR / Manager</button>
-            </div>
-
-            <h2 id="login-main-heading" class="login-main-heading">Employee sign in</h2>
-            <p id="login-main-sub" class="login-main-sub">
-              Use your staff ID and password to access your attendance and shift information.
-            </p>
-
-            <form id="login-form">
-              <input type="hidden" id="role" value="employee" />
-
-              <div class="field">
-                <div class="field-label">Staff ID / Username</div>
-                <input id="username" type="text" class="input" autocomplete="off" />
-              </div>
-
-              <div class="field">
-                <div class="field-label">Password</div>
-                <div class="input-with-toggle">
-                  <input id="password" type="password" class="input" autocomplete="off" />
-                  <button type="button" id="toggle-password" class="eye-btn" aria-label="Show password">👁</button>
-                </div>
-              </div>
-
-              <button type="submit" class="btn-primary" id="login-submit-btn">
-                <span id="sign-in-label">Sign in as Employee</span>
-              </button>
-              <div id="login-error" class="error hidden"></div>
-            </form>
-
-            <p id="login-hint-employee" class="login-hint">
-              Employees: contact HR if you do not have your login yet.
-            </p>
-            <p id="login-hint-hr" class="login-hint hidden">
-              HR/Managers: use your HR credentials issued by IT.
-            </p>
-          </div>
-        </div>
-      </div>
-    </section>
 
     <!-- DASHBOARD SCREEN -->
-    <section id="dashboard-screen" class="hidden">
+    <section id="dashboard-screen">
       <header class="dash-header">
         <div class="brand">
           <div class="brand-icon">⏱</div>
@@ -1060,50 +961,7 @@
                 TOTAL: <span class="total-highlight">0.00 Hours</span>
               </div>
            </div>
-         
-            <!-- QR ATTENDANCE SECTION -->
-            <div class="section" id="qr-section" style="margin-top:10px;">
-              <div class="section-title">QR code attendance</div>
-              <div class="section-body">
-                In production this would use the camera to scan the QR on each staff ID badge.
-                For this prototype, type a staff username (for example <code>employee1</code>) and click
-                <strong>Submit</strong>, or click <strong>Start Scanner</strong> to use camera.
-              </div>
-              <div class="form-row" style="margin-top:6px;">
-                <div class="field">
-                  <div class="field-label">Employee ID</div>
-                  <input id="qr-manual-input" type="text" class="input" placeholder="e.g. employee1" />
-                </div>
-                <div class="field" style="flex:0 0 auto; align-self:flex-end;">
-                  <button type="button" id="qr-manual-btn" class="btn-small">Submit</button>
-                </div>
-              </div>
-              <div style="margin-top:12px;">
-                <div class="field-label">Camera Scanner</div>
-                <div style="position:relative; width:280px; height:210px; background:#111; border-radius:8px; overflow:hidden; margin-top:6px;">
-                  <video id="qr-video" autoplay playsinline style="width:100%; height:100%; object-fit:cover;"></video>
-                  <div id="qr-scan-frame" style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:140px; height:140px; border:2px solid #38bdf8; border-radius:8px; display:none;"></div>
-                </div>
-                <canvas id="qr-canvas" style="display:none;"></canvas>
-                <div style="margin-top:8px;">
-                  <button type="button" id="qr-start-btn" class="btn-small">Start Scanner</button>
-                  <button type="button" id="qr-stop-btn" class="btn-small" style="margin-left:6px;" disabled>Stop Scanner</button>
-                </div>
-              </div>
-              <div id="qr-result-display" style="display:none; margin-top:16px; padding:20px; background:rgba(15,23,42,0.9); border-radius:12px; text-align:center; border:2px solid #22c55e;">
-                <div id="qr-result-icon" style="font-size:3rem; color:#22c55e;">✓</div>
-                <div id="qr-result-message" style="font-size:1.4rem; font-weight:700; color:#22c55e; margin:8px 0;">Successfully Clocked In!</div>
-                <div id="qr-result-time" style="font-size:1.6rem; font-weight:600; color:#fff; font-family:monospace;">08:30:00 AM</div>
-                <div id="qr-result-name" style="font-size:1rem; color:#9ca3af; margin-top:4px;">Sarah Johnson</div>
-                <button type="button" id="qr-new-scan-btn" class="btn-small" style="margin-top:12px;">Scan Another</button>
-              </div>
-              <div class="section-body" id="qr-scan-status" style="margin-top:8px; font-size:11px;">
-                Ready for scanning...
-              </div>
-            </div>
-          </div> 
-             <!-- END QR ATTENDANCE SECTION -->
-        </section>
+</section>
 
         <!-- LEAVE & ABSENCE -->
         <section class="view hidden" data-view-id="leave">
@@ -1325,24 +1183,33 @@
 
   <script>
     (function () {
-      const loginScreen = document.getElementById("login-screen");
+      // ========== AUTHENTICATION CHECK ==========
+      // Check if user is logged in via localStorage
+      let currentUser = null;
+      let currentRole = null;
+
+      try {
+        const storedUser = localStorage.getItem("kronosUser");
+        const storedRole = localStorage.getItem("kronosRole");
+        
+        if (storedUser && storedRole) {
+          currentUser = JSON.parse(storedUser);
+          currentRole = storedRole;
+        } else {
+          // No user logged in - redirect to login page
+          window.location.href = "kronos_login.html";
+          return;
+        }
+      } catch (err) {
+        console.error("Error reading login data:", err);
+        window.location.href = "kronos_login.html";
+        return;
+      }
+      // ========== END AUTHENTICATION CHECK ==========
+
       const dashboardScreen = document.getElementById("dashboard-screen");
-      const loginForm = document.getElementById("login-form");
-      const loginError = document.getElementById("login-error");
-      const roleSelect = document.getElementById("role");
       const userRoleLabel = document.getElementById("user-role-label");
       const userNameLabel = document.getElementById("user-name-label");
-
-      const loginShell = document.getElementById("login-shell");
-      const toggleEmployee = document.getElementById("toggle-employee");
-      const toggleHr = document.getElementById("toggle-hr");
-      const loginMainHeading = document.getElementById("login-main-heading");
-      const loginMainSub = document.getElementById("login-main-sub");
-      const signInLabel = document.getElementById("sign-in-label");
-      const loginHintEmployee = document.getElementById("login-hint-employee");
-      const loginHintHr = document.getElementById("login-hint-hr");
-      const leftCopyEmployee = document.getElementById("left-copy-employee");
-      const leftCopyHr = document.getElementById("left-copy-hr");
 
       const navLinks = document.querySelectorAll(".nav-link");
       const views = document.querySelectorAll(".view");
@@ -1351,24 +1218,16 @@
 
       // LOGOUT HANDLER
       logoutBtn.addEventListener("click", function () {
-        // Clear user session data
-        currentUser = null;
-        currentRole = null;
-
-        // Hide dashboard, show login
-        dashboardScreen.classList.add("hidden");
-        loginScreen.classList.remove("hidden");
-
-        // Reset form + UI
-        loginForm.reset();
-        loginError.classList.add("hidden");
-
-        // Reset role toggle to employee by default
-        switchRole("employee");
-
-        // Reset displayed user labels
-        userRoleLabel.textContent = "Employee";
-        userNameLabel.textContent = "-";
+        // Clear user session data from localStorage
+        try {
+          localStorage.removeItem("kronosUser");
+          localStorage.removeItem("kronosRole");
+        } catch (err) {
+          console.warn("Could not clear localStorage:", err);
+        }
+        
+        // Redirect to login page
+        window.location.href = "kronos_login.html";
       });
 
       const notifWrapper = document.getElementById("notif-wrapper");
@@ -1377,9 +1236,6 @@
       const notifDropdown = document.getElementById("notif-dropdown");
       const notifList = document.getElementById("notif-list");
       const notifTitle = document.getElementById("notif-title");
-
-      const togglePasswordBtn = document.getElementById("toggle-password");
-      const passwordInput = document.getElementById("password");
 
       // Metrics + report chips
       const metricAttendance = document.getElementById("metric-attendance");
@@ -1501,27 +1357,6 @@
         const data = await res.json(); // { log: { ... } }
         return data.log;
       }
-
-
-      // QR attendance elements
-      const qrManualInput = document.getElementById("qr-manual-input");
-      const qrManualBtn = document.getElementById("qr-manual-btn");
-      const qrScanStatus = document.getElementById("qr-scan-status");
-      const qrVideo = document.getElementById("qr-video");
-      const qrCanvas = document.getElementById("qr-canvas");
-      const qrStartBtn = document.getElementById("qr-start-btn");
-      const qrStopBtn = document.getElementById("qr-stop-btn");
-      const qrScanFrame = document.getElementById("qr-scan-frame");
-      const qrResultDisplay = document.getElementById("qr-result-display");
-      const qrResultIcon = document.getElementById("qr-result-icon");
-      const qrResultMessage = document.getElementById("qr-result-message");
-      const qrResultTime = document.getElementById("qr-result-time");
-      const qrResultName = document.getElementById("qr-result-name");
-      const qrNewScanBtn = document.getElementById("qr-new-scan-btn");
-      let qrStream = null;
-      let qrScanning = false;
-      const qrEmployeeStatus = {};
-
 
       // Leave section
 
@@ -1843,56 +1678,6 @@
 
       // Notifications: { text, kind, indexRef, handled, targetRole, targetUser, seen }
       const notifications = [];
-
-      let currentRole = null; // "employee" or "hr"
-      let currentUser = null; // { role, username, displayName }
-
-      function switchRole(role) {
-        roleSelect.value = role;
-        loginShell.dataset.role = role;
-
-        if (role === "employee") {
-          toggleEmployee.classList.add("active");
-          toggleHr.classList.remove("active");
-          loginMainHeading.textContent = "Employee sign in";
-          loginMainSub.textContent =
-            "Use your staff ID and password to access your attendance and shift information.";
-          signInLabel.textContent = "Sign in as Employee";
-          loginHintEmployee.classList.remove("hidden");
-          loginHintHr.classList.add("hidden");
-          leftCopyEmployee.classList.remove("hidden");
-          leftCopyHr.classList.add("hidden");
-        } else {
-          toggleHr.classList.add("active");
-          toggleEmployee.classList.remove("active");
-          loginMainHeading.textContent = "HR / Manager sign in";
-          loginMainSub.textContent =
-            "Access attendance exceptions, approve leave and publish official schedules.";
-          signInLabel.textContent = "Sign in as HR / Manager";
-          loginHintEmployee.classList.add("hidden");
-          loginHintHr.classList.remove("hidden");
-          leftCopyEmployee.classList.add("hidden");
-          leftCopyHr.classList.remove("hidden");
-        }
-      }
-
-      toggleEmployee.addEventListener("click", function (e) {
-        e.preventDefault();
-        switchRole("employee");
-      });
-
-      toggleHr.addEventListener("click", function (e) {
-        e.preventDefault();
-        switchRole("hr");
-      });
-
-      // Password eye toggle
-      togglePasswordBtn.addEventListener("click", function () {
-        const isPwd = passwordInput.type === "password";
-        passwordInput.type = isPwd ? "text" : "password";
-        togglePasswordBtn.textContent = isPwd ? "🙈" : "👁";
-        togglePasswordBtn.setAttribute("aria-label", isPwd ? "Hide password" : "Show password");
-      });
 
       // Navigation handler
       function showView(viewName) {
@@ -2842,139 +2627,70 @@
 
       }
 
-      // LOGIN LOGIC
-
-      const MOCK_USERS = {
-        "employee1": { id: 1, username: "employee1", displayName: "Sarah Johnson", role: "employee" },
-        "employee2": { id: 2, username: "employee2", displayName: "Michael Chen", role: "employee" },
-        "emp001": { id: 3, username: "emp001", displayName: "Emily Rodriguez", role: "employee" },
-        "hr1": { id: 100, username: "hr1", displayName: "Admin Manager", role: "hr" },
-        "hradmin": { id: 101, username: "hradmin", displayName: "HR Director", role: "hr" }
-      };
-
-      const MOCK_PASSWORDS = {
-        "employee1": "emp123", "employee2": "emp123", "emp001": "emp123",
-        "hr1": "hr123", "hradmin": "hr123"
-      };
-
-      function tryMockLogin(username, password, selectedRole) {
-        const user = MOCK_USERS[username.toLowerCase()];
-        if (!user) return null;
-        if (MOCK_PASSWORDS[username.toLowerCase()] !== password) return null;
-        if (user.role !== selectedRole) return null;
-        return user;
-      }
-
-      function completeLoginUI(user, role) {
-        currentRole = role;
-        currentUser = {
-          role: role,
-          username: user.username,
-          dbId: user.id,
-          displayName: user.displayName,
-          roleId: role === "hr" ? 2 : 1
-        };
-
-        userRoleLabel.textContent = currentRole === "employee" ? "Employee" : "HR / Admin";
-        userNameLabel.textContent = currentUser.displayName;
-
-        const reportsLink = document.querySelector('.nav-link[data-target="reports"]');
-        if (currentRole === "hr") {
-          if (reportsLink) reportsLink.classList.remove("hidden");
-          attendanceEntryBlock.classList.add("hidden");
-          newShiftRequestSection.classList.add("hidden");
-          hrCreateShiftSection.classList.remove("hidden");
-          shiftRequestsHeading.textContent = "All shift requests (this session)";
-          if (leaveFormSection) leaveFormSection.classList.add("hidden");
-        } else {
-          if (reportsLink) reportsLink.classList.add("hidden");
-          attendanceEntryBlock.classList.remove("hidden");
-          hrCreateShiftSection.classList.add("hidden");
-          newShiftRequestSection.classList.remove("hidden");
-          shiftRequestsHeading.textContent = "Your shift requests (this session)";
-          if (leaveFormSection) leaveFormSection.classList.remove("hidden");
-        }
-
-        loginScreen.classList.add("hidden");
-        dashboardScreen.classList.remove("hidden");
-        showView("dashboard");
-
-        renderShifts();
-        renderShiftPools();
-        populateShiftOptions();
-        updateAttendanceControls();
-        renderNotifications();
-        updateReports();
-      }
-
-      loginForm.addEventListener("submit", async function (e) {
-        e.preventDefault();
-
-        const username = document.getElementById("username").value.trim();
-        const password = document.getElementById("password").value.trim();
-        const selectedRole = roleSelect.value;
-
-        loginError.classList.add("hidden");
-        loginError.textContent = "";
-
-        if (!username || !password) {
-          loginError.textContent = "Please enter username and password.";
-          loginError.classList.remove("hidden");
-          return;
-        }
-
-        try {
-          const response = await fetch("/api/auth/login", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ userId: username, password })
-          });
-
-          if (response.ok) {
-            const data = await response.json();
-            const user = data.user;
-            const roleFromDb = user.roleId === 2 ? "hr" : "employee";
-            completeLoginUI({
-              id: user.id,
-              username: user.userId,
-              displayName: [user.firstName, user.lastName].filter(Boolean).join(" ") || user.userId
-            }, roleFromDb);
-
-            await loadAttendanceForCurrentUser();
-            await loadLeaveForCurrentUser();
-            if (currentRole === "hr") await loadEmployeesForHr();
-            await loadShiftsForCurrentUser();
-            await loadShiftRequestsForCurrentUser();
-            return;
-          }
-
-          const mockUser = tryMockLogin(username, password, selectedRole);
-          if (mockUser) {
-            completeLoginUI(mockUser, mockUser.role);
-            return;
-          }
-
-          loginError.textContent = "Invalid credentials. Try: employee1/emp123 or hr1/hr123";
-          loginError.classList.remove("hidden");
-
-        } catch (err) {
-          const mockUser = tryMockLogin(username, password, selectedRole);
-          if (mockUser) {
-            completeLoginUI(mockUser, mockUser.role);
-            return;
-          }
-          loginError.textContent = "Server unavailable. Try: employee1/emp123 or hr1/hr123";
-          loginError.classList.remove("hidden");
-        }
-      });
-
-      // NAVIGATION
+      // ========== NAVIGATION ==========
+      // Set up navigation BEFORE initialization to ensure it always works
       navLinks.forEach((link) => {
         link.addEventListener("click", function () {
           const target = link.dataset.target;
           showView(target);
         });
       });
+
+      // ========== INITIALIZE UI FOR LOGGED-IN USER ==========
+      // Set up the UI based on the user loaded from localStorage
+      function initializeUserInterface() {
+        try {
+          // Update user display labels
+          userRoleLabel.textContent = currentRole === "employee" ? "Employee" : "HR / Admin";
+          userNameLabel.textContent = currentUser.displayName || currentUser.username;
+
+          // Configure UI based on role
+          const reportsLink = document.querySelector('.nav-link[data-target="reports"]');
+          if (currentRole === "hr") {
+            // HR role configuration
+            if (reportsLink) reportsLink.classList.remove("hidden");
+            if (attendanceEntryBlock) attendanceEntryBlock.classList.add("hidden");
+            if (newShiftRequestSection) newShiftRequestSection.classList.add("hidden");
+            if (hrCreateShiftSection) hrCreateShiftSection.classList.remove("hidden");
+            if (shiftRequestsHeading) shiftRequestsHeading.textContent = "All shift requests (this session)";
+            if (leaveFormSection) leaveFormSection.classList.add("hidden");
+          } else {
+            // Employee role configuration
+            if (reportsLink) reportsLink.classList.add("hidden");
+            if (attendanceEntryBlock) attendanceEntryBlock.classList.remove("hidden");
+            if (hrCreateShiftSection) hrCreateShiftSection.classList.add("hidden");
+            if (newShiftRequestSection) newShiftRequestSection.classList.remove("hidden");
+            if (shiftRequestsHeading) shiftRequestsHeading.textContent = "Your shift requests (this session)";
+            if (leaveFormSection) leaveFormSection.classList.remove("hidden");
+          }
+
+          // Show dashboard view
+          showView("dashboard");
+
+          // Initialize UI components
+          updateMetrics();
+          updateReports();
+          renderNotifications();
+          renderShifts();
+          renderShiftPools();
+          populateShiftOptions();
+          populateHrEmployeeSelect();
+          renderAttendance();
+          updateAttendanceControls();
+          
+          // Load data from backend
+          loadAttendanceForCurrentUser();
+          loadLeaveForCurrentUser();
+          if (currentRole === "hr") loadEmployeesForHr();
+          loadShiftsForCurrentUser();
+          loadShiftRequestsForCurrentUser();
+        } catch (err) {
+          console.error("Error initializing UI:", err);
+        }
+      }
+
+      // Call initialization
+      initializeUserInterface();
 
       // NOTIFICATION TOGGLE
       notifBtn.addEventListener("click", function () {
@@ -3327,163 +3043,6 @@
       // Shift action change -> refresh list of shifts to choose from
       shiftActionSelect.addEventListener("change", populateShiftOptions);
 
-      // QR Scanner Functions
-      function getQrEmployeeStatus(empId) {
-        if (!qrEmployeeStatus[empId]) {
-          qrEmployeeStatus[empId] = { clockedIn: false };
-        }
-        return qrEmployeeStatus[empId];
-      }
-
-      function processQrScan(employeeId) {
-        const empId = (employeeId || "").trim().toLowerCase();
-        if (!empId) {
-          qrScanStatus.textContent = "No employee ID provided.";
-          return;
-        }
-
-        let empIdClean = empId;
-        if (empId.startsWith("kronos:")) {
-          const parts = empId.split(":");
-          empIdClean = parts[1] || empId;
-        }
-
-        const mockUser = MOCK_USERS[empIdClean];
-        if (!mockUser) {
-          qrScanStatus.textContent = "Employee not found: " + empIdClean;
-          qrResultDisplay.style.display = "block";
-          qrResultDisplay.style.borderColor = "#ef4444";
-          qrResultIcon.textContent = "✗";
-          qrResultIcon.style.color = "#ef4444";
-          qrResultMessage.textContent = "Employee Not Found";
-          qrResultMessage.style.color = "#ef4444";
-          qrResultTime.textContent = "";
-          qrResultName.textContent = empIdClean;
-          return;
-        }
-
-        const status = getQrEmployeeStatus(empIdClean);
-        const now = new Date();
-        const timeStr = now.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: true });
-        
-        status.clockedIn = !status.clockedIn;
-        const action = status.clockedIn ? "in" : "out";
-
-        qrResultDisplay.style.display = "block";
-        qrResultDisplay.style.borderColor = "#22c55e";
-        qrResultIcon.textContent = "✓";
-        qrResultIcon.style.color = "#22c55e";
-        qrResultMessage.textContent = status.clockedIn ? "Successfully Clocked In!" : "Successfully Clocked Out!";
-        qrResultMessage.style.color = "#22c55e";
-        qrResultTime.textContent = timeStr;
-        qrResultName.textContent = mockUser.displayName;
-        qrScanStatus.textContent = mockUser.displayName + " clocked " + action + " at " + timeStr;
-
-        attendanceLog.push({
-          user: mockUser.username,
-          displayName: mockUser.displayName,
-          type: action,
-          time: now.toLocaleString()
-        });
-        renderAttendance();
-      }
-
-      async function startQrScanner() {
-        try {
-          qrStream = await navigator.mediaDevices.getUserMedia({ 
-            video: { facingMode: "environment" } 
-          });
-          qrVideo.srcObject = qrStream;
-          qrScanning = true;
-          qrStartBtn.disabled = true;
-          qrStopBtn.disabled = false;
-          qrScanFrame.style.display = "block";
-          qrScanStatus.textContent = "Scanner active - point at QR code...";
-          
-          const ctx = qrCanvas.getContext("2d");
-          
-          function scanFrame() {
-            if (!qrScanning) return;
-            
-            if (qrVideo.readyState === qrVideo.HAVE_ENOUGH_DATA) {
-              qrCanvas.width = qrVideo.videoWidth;
-              qrCanvas.height = qrVideo.videoHeight;
-              ctx.drawImage(qrVideo, 0, 0, qrCanvas.width, qrCanvas.height);
-              
-              const imageData = ctx.getImageData(0, 0, qrCanvas.width, qrCanvas.height);
-              const code = jsQR(imageData.data, imageData.width, imageData.height);
-              
-              if (code) {
-                stopQrScanner();
-                processQrScan(code.data);
-                return;
-              }
-            }
-            requestAnimationFrame(scanFrame);
-          }
-          scanFrame();
-          
-        } catch (err) {
-          qrScanStatus.textContent = "Camera error: " + err.message;
-        }
-      }
-
-      function stopQrScanner() {
-        qrScanning = false;
-        if (qrStream) {
-          qrStream.getTracks().forEach(track => track.stop());
-          qrStream = null;
-        }
-        qrVideo.srcObject = null;
-        qrStartBtn.disabled = false;
-        qrStopBtn.disabled = true;
-        qrScanFrame.style.display = "none";
-        qrScanStatus.textContent = "Scanner stopped.";
-      }
-
-      function resetQrResult() {
-        qrResultDisplay.style.display = "none";
-        qrScanStatus.textContent = "Ready for scanning...";
-      }
-
-      if (qrManualBtn) {
-        qrManualBtn.addEventListener("click", function() {
-          processQrScan(qrManualInput.value);
-        });
-      }
-
-      if (qrManualInput) {
-        qrManualInput.addEventListener("keypress", function(e) {
-          if (e.key === "Enter") processQrScan(qrManualInput.value);
-        });
-      }
-
-      if (qrStartBtn) {
-        qrStartBtn.addEventListener("click", startQrScanner);
-      }
-
-      if (qrStopBtn) {
-        qrStopBtn.addEventListener("click", stopQrScanner);
-      }
-
-      if (qrNewScanBtn) {
-        qrNewScanBtn.addEventListener("click", resetQrResult);
-      }
-
-      // Initial state
-      showView("dashboard");
-      updateMetrics();
-      updateReports();
-      renderNotifications();
-      renderShiftPools();
-      populateShiftOptions();
-      populateHrEmployeeSelect();
-      switchRole("employee");
-      renderAttendance();
-      updateAttendanceControls();
-      
-
-    
 // Helper to format decimal hours to HH:MM:SS
       function formatDecimalToTime(decimalHours) {
         if (!decimalHours) return "00:00:00";

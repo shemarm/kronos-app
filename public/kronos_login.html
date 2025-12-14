@@ -587,7 +587,6 @@ loginForm.addEventListener("submit", async function (e) {
 
     try {
       if (user) {
-         user.dbId = user.id; 
         localStorage.setItem("kronosUser", JSON.stringify(user));
       }
       localStorage.setItem("kronosRole", derivedRole);

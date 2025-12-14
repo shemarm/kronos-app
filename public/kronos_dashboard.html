@@ -761,7 +761,7 @@
       border: 1px dashed rgba(148, 163, 184, 0.8);
       color: var(--text-muted);
     }
-      /* --- NEW TABLE STYLES --- */
+
     #workHoursTable {
       border-collapse: separate;
       border-spacing: 0;
@@ -788,32 +788,104 @@
       color: #f8fafc;
     }
 
-    /* Stacked Time Column */
-    .time-stack { display: flex; flex-direction: column; gap: 2px; }
-    .time-date { font-size: 11px; color: #64748b; margin-bottom: 4px; }
-    .time-entry { font-weight: 500; font-size: 13px; color: #e2e8f0; }
-    .time-entry span { color: #94a3b8; font-size: 11px; margin-right: 4px; font-weight: 600; }
+    .time-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
 
-        /* Duration Column */
-    .duration-main { color: #4ade80; font-family: monospace; font-size: 13px; letter-spacing: 0.5px; }
-    .duration-sub { font-size: 11px; color: #64748b; margin-top: 2px; }
-    .duration-incomplete { color: #facc15; font-family: monospace; font-size: 13px; letter-spacing: 0.5px; }
-    
+    .time-date {
+      font-size: 11px;
+      color: #64748b;
+      margin-bottom: 4px;
+    }
 
-/* Status Column */
-    .status-text-progress { color: #facc15; font-weight: 700; text-transform: uppercase; font-size: 12px; }
-    .status-text-complete { color: #e2e8f0; font-weight: 400; font-size: 13px; }
+    .time-entry {
+      font-weight: 500;
+      font-size: 13px;
+      color: #e2e8f0;
+    }
 
-    /* Audit Badges */
-    .audit-badge { display: inline-flex; align-items: center; justify-content: center; padding: 4px 12px; border-radius: 999px; font-size: 11px; font-weight: 600; min-width: 80px; }
-    .audit-in { background: rgba(234, 179, 8, 0.15); border: 1px solid rgba(234, 179, 8, 0.3); color: #facc15; }
-    .audit-synced { background: rgba(34, 197, 94, 0.15); border: 1px solid rgba(34, 197, 94, 0.3); color: #4ade80; }
+    .time-entry span {
+      color: #94a3b8;
+      font-size: 11px;
+      margin-right: 4px;
+      font-weight: 600;
+    }
 
-    /* Total Footer */
-    .table-footer-total { text-align: right; padding: 12px 16px; font-size: 12px; color: #94a3b8; font-weight: 600; text-transform: uppercase; border-top: 1px solid rgba(51, 65, 85, 0.5); }
-    .total-highlight { color: #e2e8f0; font-weight: 700; margin-left: 4px; }
-    
+    .duration-main {
+      color: #4ade80;
+      font-family: monospace;
+      font-size: 13px;
+      letter-spacing: 0.5px;
+    }
+
+    .duration-sub {
+      font-size: 11px;
+      color: #64748b;
+      margin-top: 2px;
+    }
+
+    .duration-incomplete {
+      color: #facc15;
+      font-family: monospace;
+      font-size: 13px;
+      letter-spacing: 0.5px;
+    }
+
+    .status-text-progress {
+      color: #facc15;
+      font-weight: 700;
+      text-transform: uppercase;
+      font-size: 12px;
+    }
+
+    .status-text-complete {
+      color: #e2e8f0;
+      font-weight: 400;
+      font-size: 13px;
+    }
+
+    .audit-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 4px 12px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 600;
+      min-width: 80px;
+    }
+
+    .audit-in {
+      background: rgba(234, 179, 8, 0.15);
+      border: 1px solid rgba(234, 179, 8, 0.3);
+      color: #facc15;
+    }
+
+    .audit-synced {
+      background: rgba(34, 197, 94, 0.15);
+      border: 1px solid rgba(34, 197, 94, 0.3);
+      color: #4ade80;
+    }
+
+    .table-footer-total {
+      text-align: right;
+      padding: 12px 16px;
+      font-size: 12px;
+      color: #94a3b8;
+      font-weight: 600;
+      text-transform: uppercase;
+      border-top: 1px solid rgba(51, 65, 85, 0.5);
+    }
+
+    .total-highlight {
+      color: #e2e8f0;
+      font-weight: 700;
+      margin-left: 4px;
+    }
   </style>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 </head>
 
 <body>
@@ -1003,6 +1075,7 @@
           </div>
         </section>
 
+        <!-- ATTENDANCE -->
         <section class="view hidden" data-view-id="attendance">
           <h2 class="view-title">Attendance</h2>
           <p class="view-subtitle">
@@ -1010,7 +1083,6 @@
           </p>
 
           <div class="card">
-
             <div id="attendance-entry-block">
               <div class="section-title">Clock in / Clock out</div>
               <form id="attendance-form">
@@ -1028,30 +1100,9 @@
                   <button type="submit" class="btn-small">Submit</button>
                 </div>
               </form>
-              </div>
-            
-            <div class="work-hours-section" style="margin-top: 40px;">
-              <div class="section-title">Work Hours Summary</div>
-              <p class="section-body" style="margin-bottom:10px;">Your recorded activity for the past 7 days.</p>
-            
-              <table id="workHoursTable">
-                  <thead>
-                      <tr>
-                          <th style="width: 30%">Clock In / Out Times</th>
-                          <th style="width: 20%">Duration</th>
-                          <th style="width: 15%">Status</th>
-                          <th style="width: 15%">Device</th>
-                          <th style="text-align: right;">Audit</th>
-                      </tr>
-                  </thead>
-                  <tbody>
-                  </tbody>
-              </table>
-              <div id="weeklyTotal" class="table-footer-total">
-                TOTAL: <span class="total-highlight">0.00 Hours</span>
-              </div>
-           </div>
-         
+            </div>
+
+
             <!-- QR ATTENDANCE SECTION -->
             <div class="section" id="qr-section" style="margin-top:10px;">
               <div class="section-title">QR code attendance</div>
@@ -1081,8 +1132,39 @@
                 reader.
               </div>
             </div>
-          </div> 
-             <!-- END QR ATTENDANCE SECTION -->
+            <!-- END QR ATTENDANCE SECTION -->
+
+            <!-- NEW: Work Hours Summary Table -->
+            <div class="work-hours-section" style="margin-top: 40px;">
+              <div class="section-title">Work Hours Summary</div>
+              <p class="section-body" style="margin-bottom:10px;">Your recorded activity for the past 7 days.</p>
+
+              <table id="workHoursTable">
+                <thead>
+                  <tr>
+                    <th style="width: 30%">Clock In / Out Times</th>
+                    <th style="width: 20%">Employee</th>
+                    <th style="width: 15%">Duration</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+              <div id="weeklyTotal" class="table-footer-total">
+                TOTAL: <span class="total-highlight">0.00 Hours</span>
+              </div>
+            </div>
+
+
+            <!---
+            <table>
+              <thead id="attendance-head">
+              </thead>
+              <tbody id="attendance-rows">
+              </tbody>
+            </table>
+            -->
+
+          </div>
         </section>
 
         <!-- LEAVE & ABSENCE -->
@@ -1205,6 +1287,7 @@
                   <div class="field">
                     <div class="field-label">Action</div>
                     <select id="shift-action" class="input">
+                      <option value="" selected>-- Select action --</option>
                       <option value="Trade">Trade shift</option>
                       <option value="Pick up">Pick up available shift</option>
                       <option value="Drop">Drop assigned shift</option>
@@ -1293,9 +1376,11 @@
                   </div>
                 </div>
               </form>
-              <div class="section-body" id="employee-report-output" style="margin-top:6px;">
+              <div class="section-body" id="employee-report-output"
+                style="margin-top:6px; padding-left: 20px; padding-right: 20px; max-width: 100%; overflow-x: auto;">
                 Select an employee to view a summary of their attendance, leave and shift activity for this session.
               </div>
+              <button type="button" id="employee-report-download" class="btn-small hidden">Download PDF</button>
             </div>
           </div>
         </section>
@@ -1383,7 +1468,6 @@
       async function loadAttendanceForCurrentUser() {
         attendanceLog.length = 0;
 
-
         if (!currentUser || !currentRole) {
           renderAttendance();
           return;
@@ -1393,7 +1477,6 @@
           let url;
 
           if (currentRole === "employee") {
-            // Fetch only this user's logs
             if (!currentUser.dbId) {
               console.warn("No dbId on currentUser; cannot load attendance");
               renderAttendance();
@@ -1401,7 +1484,6 @@
             }
             url = `/api/attendance/user/${currentUser.dbId}`;
           } else if (currentRole === "hr") {
-            // HR sees all recent logs (with joined user info)
             url = "/api/attendance/recent";
           } else {
             renderAttendance();
@@ -1416,50 +1498,60 @@
           const data = await res.json();
           const logs = data.logs || [];
 
+          console.log("Loaded attendance logs:", logs); // ✅ Debug
+
           logs.forEach((log) => {
-            // Map DB row -> frontend format used by renderAttendance()
             if (currentRole === "employee") {
-              // Employee view: only their own logs
               attendanceLog.push({
                 userId: currentUser.dbId,
-                user: currentUser.username, // staff_id / username
+                user: currentUser.username,
                 displayName: currentUser.displayName,
-                type:
-                  log.event_type &&
-                    log.event_type.toUpperCase() === "OUT"
-                    ? "out"
-                    : "in",
-                time: log.recorded_at
-                  ? new Date(log.recorded_at).toLocaleString()
-                  : ""
+                type: log.event_type && log.event_type.toUpperCase() === "OUT" ? "out" : "in",
+                time: log.recorded_at || new Date().toISOString(),
+                hoursWorked: log.hoursWorked || null
               });
             } else {
-              // HR view: show proper employee name (requires backend join on users)
               const fullName = [log.first_name, log.last_name].filter(Boolean).join(" ");
 
               attendanceLog.push({
                 userId: log.user_id,
-                user: log.user_id, // keep if you still want the id
+                user: log.user_id,
                 displayName: fullName || `User #${log.user_id}`,
-                type:
-                  log.event_type &&
-                    log.event_type.toUpperCase() === "OUT"
-                    ? "out"
-                    : "in",
-                time: log.recorded_at
-                  ? new Date(log.recorded_at).toLocaleString()
-                  : ""
+                type: log.event_type && log.event_type.toUpperCase() === "OUT" ? "out" : "in",
+                time: log.recorded_at || new Date().toISOString(),
+                hoursWorked: log.hoursWorked || null
               });
             }
           });
 
+          console.log("attendanceLog after loading:", attendanceLog); // ✅ Debug
+
+
+          // ✅ Set initial clocked-in state based on last event for current employee
+          if (currentRole === "employee" && currentUser) {
+            const userLogs = attendanceLog.filter(e => e.userId === currentUser.dbId);
+            if (userLogs.length > 0) {
+              // Sort by time to get most recent
+              const sorted = userLogs.sort((a, b) => new Date(b.time) - new Date(a.time));
+              const lastEvent = sorted[0];
+
+              const status = getEmployeeStatus(currentUser.username);
+              status.clockedIn = lastEvent.type === "in";
+
+              console.log("Initial clock state:", status.clockedIn ? "CLOCKED IN" : "CLOCKED OUT");
+            }
+          }
+
           renderAttendance();
+          renderWorkHoursTable();
+          updateAttendanceControls();
         } catch (err) {
           console.error("Failed to load attendance:", err);
-          renderAttendance(); // At least render empty state
+          renderAttendance();
+          renderWorkHoursTable();
         }
       }
-            
+
       // Save attendance to server
       async function saveAttendanceToServer({ userDbId, eventType, source = "WEB_FORM", qrValue = null }) {
         const res = await fetch("/api/attendance", {
@@ -1600,7 +1692,278 @@
       const availableShifts = [];  // shifts with status = 'AVAILABLE' (from /api/shifts/available)
       const hrEmployees = [];
 
-      // Load shift requests for current user / role 
+
+
+      function renderShifts() {
+        if (!shiftRows || !Array.isArray(shiftRequests)) return;
+        shiftRows.innerHTML = "";
+
+        const rows = shiftRequests;
+
+        rows.forEach((req, index) => {
+          const tr = document.createElement("tr");
+          const tdIndex = document.createElement("td");
+          const tdEmployee = document.createElement("td");
+          const tdType = document.createElement("td");
+          const tdDetails = document.createElement("td");
+          const tdStatus = document.createElement("td");
+
+          tdIndex.textContent = (index + 1).toString();
+
+          // Show employee name
+          const empName =
+            req.userDisplayName ||
+            (req.userId ? `User #${req.userId}` : req.user || "-");
+          tdEmployee.textContent = empName;
+
+          // Show request type
+          tdType.textContent = req.type; // "Trade" | "Pick up" | "Drop"
+
+          // Show shift label + optional note
+          let detailsText = req.shiftLabel || `Shift #${req.shiftId}`;
+
+          if (req.shiftDescription) {
+            detailsText = req.shiftDescription;
+          }
+
+          if (req.note) {
+            detailsText += " – " + req.note;
+          }
+          tdDetails.textContent = detailsText;
+
+          // Status pill
+          const statusInfo = formatStatus(req.status); // "Pending" | "Approved" | "Rejected"
+          const statusPill = document.createElement("span");
+          statusPill.classList.add("pill-status");
+          if (statusInfo.cls) statusPill.classList.add(statusInfo.cls);
+          statusPill.textContent = statusInfo.label;
+
+          if (currentRole === "hr") {
+            // HR sees inline actions for shift requests
+            const wrapper = document.createElement("div");
+            wrapper.classList.add("leave-actions-wrapper");
+            wrapper.addEventListener("click", function (evt) {
+              evt.stopPropagation();
+            });
+
+            wrapper.appendChild(statusPill);
+
+            const toggleBtn = document.createElement("button");
+            toggleBtn.type = "button";
+            toggleBtn.classList.add("leave-action-toggle");
+            toggleBtn.textContent = "⋯";
+
+            const menu = document.createElement("div");
+            menu.classList.add("leave-action-menu", "hidden");
+
+            const approveBtn = document.createElement("button");
+            approveBtn.textContent = "Approve";
+            approveBtn.addEventListener("click", function (evt) {
+              evt.stopPropagation();
+              menu.classList.add("hidden");
+              handleShiftAction(index, "APPROVED");
+            });
+
+            const rejectBtn = document.createElement("button");
+            rejectBtn.classList.add("leave-action-reject");
+            rejectBtn.textContent = "Reject";
+            rejectBtn.addEventListener("click", function (evt) {
+              evt.stopPropagation();
+              menu.classList.add("hidden");
+              handleShiftAction(index, "REJECTED");
+            });
+
+            const resetBtn = document.createElement("button");
+            resetBtn.textContent = "Reset to pending";
+            resetBtn.addEventListener("click", function (evt) {
+              evt.stopPropagation();
+              menu.classList.add("hidden");
+              handleShiftAction(index, "PENDING");
+            });
+
+            menu.appendChild(approveBtn);
+            menu.appendChild(rejectBtn);
+            menu.appendChild(resetBtn);
+
+            toggleBtn.addEventListener("click", function (evt) {
+              evt.stopPropagation();
+              const isHidden = menu.classList.contains("hidden");
+              const menus = document.querySelectorAll(".leave-action-menu");
+              menus.forEach((m) => m.classList.add("hidden"));
+              if (isHidden) {
+                menu.classList.remove("hidden");
+              }
+            });
+
+            wrapper.appendChild(toggleBtn);
+            wrapper.appendChild(menu);
+
+            tdStatus.appendChild(wrapper);
+          } else {
+            // Employee view: just show the pill
+            tdStatus.appendChild(statusPill);
+          }
+
+          tr.appendChild(tdIndex);
+          tr.appendChild(tdEmployee);
+          tr.appendChild(tdType);
+          tr.appendChild(tdDetails);
+          tr.appendChild(tdStatus);
+
+          shiftRows.appendChild(tr);
+        });
+
+        updateMetrics();
+        updateReports();
+      }
+
+      async function handleShiftAction(index, newStatus) {
+        const req = shiftRequests[index];
+        if (!req) return;
+        if (!currentUser || currentRole !== "hr") return;
+
+        const requestId = req.id;
+        if (!requestId) {
+          console.error("Missing shift request id:", req);
+          return;
+        }
+
+        try {
+          const res = await fetch(`/api/shift-requests/${requestId}/status`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              status: newStatus,
+              approverId: currentUser.dbId
+            })
+          });
+
+          if (!res.ok) {
+            const errData = await res.json().catch(() => ({}));
+            throw new Error(errData.message || "Failed to update shift request status");
+          }
+
+          const data = await res.json();
+          const updated = data.shiftRequest || {};
+
+          // Normalise status
+          const rawStatus = (updated.status || newStatus || "PENDING").toUpperCase();
+          let baseStatus;
+          if (rawStatus === "APPROVED") baseStatus = "Approved";
+          else if (rawStatus === "REJECTED") baseStatus = "Rejected";
+          else baseStatus = "Pending";
+
+          req.status = baseStatus;
+          req.approvedBy = updated.approved_by || null;
+          req.approvedAt = updated.approved_at || null;
+
+          // Notify employee
+          if (req.user) {
+            addNotification({
+              text:
+                "Your " +
+                req.type.toLowerCase() +
+                " request for " +
+                req.shiftLabel +
+                " was " +
+                baseStatus,
+              kind: "shift",
+              indexRef: index,
+              targetRole: "employee",
+              targetUser: req.user
+            });
+          }
+
+          // Refresh data after approval/rejection
+          await loadShiftsForCurrentUser();
+          await loadShiftRequestsForCurrentUser();
+
+          renderShifts();
+          renderShiftPools();
+          renderNotifications();
+        } catch (err) {
+          console.error("handleShiftAction error:", err);
+          alert("Could not update shift request status. Please try again.");
+        }
+      }
+
+      // Load shifts (assigned + available) for current user / role
+
+      async function loadShiftsForCurrentUser() {
+        // clear current data
+        assignedShifts.length = 0;
+        availableShifts.length = 0;
+
+        if (!currentUser || !currentRole) {
+          renderShiftPools();
+          renderShifts();
+          return;
+        }
+
+        try {
+          // Employee's own assigned shifts
+          if (currentRole === "employee" && currentUser.dbId) {
+            const resAssigned = await fetch(`/api/shifts/user/${currentUser.dbId}`);
+            if (!resAssigned.ok) {
+              throw new Error("Failed to fetch user shifts");
+            }
+            const dataAssigned = await resAssigned.json();
+            const shifts = dataAssigned.shifts || [];
+
+            shifts.forEach((s) => {
+              assignedShifts.push({
+                id: s.id,
+                label: s.description || `Shift #${s.id}`,
+                status: s.status,
+              });
+            });
+          }
+
+          // Available shifts – pass userId so employee doesn't see their own assigned shifts
+          const availUrl = currentRole === "employee" && currentUser.dbId
+            ? `/api/shifts/available?userId=${currentUser.dbId}`
+            : "/api/shifts/available";
+
+          const resAvail = await fetch(availUrl);
+          if (!resAvail.ok) {
+            throw new Error("Failed to fetch available shifts");
+          }
+          const dataAvail = await resAvail.json();
+          const avail = dataAvail.shifts || [];
+
+          // Check for pending TRADE requests by current user to mark trades
+          let pendingTradeShiftIds = [];
+          if (currentRole === "employee" && currentUser.dbId) {
+            const resTradeRequests = await fetch(`/api/shift-requests/user/${currentUser.dbId}`);
+            if (resTradeRequests.ok) {
+              const tradeData = await resTradeRequests.json();
+              const requests = tradeData.shiftRequests || [];
+              pendingTradeShiftIds = requests
+                .filter(r => r.request_type === "TRADE" && r.status === "PENDING")
+                .map(r => r.shift_id);
+            }
+          }
+
+          avail.forEach((s) => {
+            availableShifts.push({
+              id: s.id,
+              label: s.description || `Shift #${s.id}`,
+              status: s.status,
+              isTrade: pendingTradeShiftIds.includes(s.id),
+            });
+          });
+
+          renderShiftPools();
+          populateShiftOptions();
+          renderShifts();
+        } catch (err) {
+          console.error("Failed to load shifts:", err);
+          renderShiftPools();
+          renderShifts();
+        }
+      }
+
+      // Load shift requests for current user / role
 
       async function loadShiftRequestsForCurrentUser() {
         // Clear in-memory list
@@ -1640,58 +2003,46 @@
           const rows = data.shiftRequests || [];
 
           rows.forEach((sr) => {
-            // Normalise status
             const rawStatus = (sr.status || "PENDING").toUpperCase();
-            let baseStatus;
+            let baseStatus = "Pending";
             if (rawStatus === "APPROVED") baseStatus = "Approved";
             else if (rawStatus === "REJECTED") baseStatus = "Rejected";
-            else baseStatus = "Pending";
 
-            // Map DB request_type -> UI label
-            let typeLabel;
-            switch ((sr.request_type || "").toUpperCase()) {
-              case "PICK_UP":
-                typeLabel = "Pick up";
-                break;
-              case "DROP":
-                typeLabel = "Drop";
-                break;
-              default:
-                typeLabel = "Trade";
-            }
+            const typeRaw = (sr.request_type || "TRADE").toUpperCase();
+            const typeLabel =
+              typeRaw === "PICK_UP" ? "Pick up" :
+                typeRaw === "DROP" ? "Drop" : "Trade";
 
             const base = {
               id: sr.id,
               userId: sr.user_id,
               shiftId: sr.shift_id,
               type: typeLabel,
-              note: sr.note,
-              status: baseStatus,
-              source: sr.source,
-              createdAt: sr.created_at,
+              note: sr.note || null,
+              status: baseStatus, // "Pending" | "Approved" | "Rejected"
+              source: sr.source || null,
+              createdAt: sr.created_at || null,
+              approvedBy: sr.approved_by || null,
+              approvedAt: sr.approved_at || null,
+              shiftDescription: sr.shift_description || null,
             };
 
-            if (currentRole === "employee") {
-              // current user’s own view
-              base.user = currentUser.username;
-              base.userDisplayName = currentUser.displayName;
-            } else if (currentRole === "hr") {
-              // HR view – use joined employee info if backend provides it
-              const fullName = [
-                sr.employee_first_name,
-                sr.employee_last_name,
-              ].filter(Boolean).join(" ");
-
+            // Enrich display for HR
+            if (currentRole === "hr") {
+              const fullName = [sr.employee_first_name, sr.employee_last_name].filter(Boolean).join(" ");
               base.userDisplayName = fullName || `User #${sr.user_id}`;
-              base.user = sr.employee_staff_id || null;
+              base.username = sr.employee_staff_id || null;
+              base.shiftLabel = sr.shift_description ? sr.shift_description : `Shift #${sr.shift_id}`;
+            } else {
+              base.userDisplayName = currentUser.displayName;
+              base.username = currentUser.username;
+              base.shiftLabel = sr.shift_description || `Shift #${sr.shift_id}`;
             }
-
-            // Prefer label from joined shift if backend provides it
-            base.shiftLabel = sr.shift_description || `Shift #${sr.shift_id}`;
 
             shiftRequests.push(base);
           });
 
+          // After loading, we will re-render tables and update badges in renderShiftPools
           renderShifts();
           updateReports();
         } catch (err) {
@@ -1700,63 +2051,6 @@
           updateReports();
         }
       }
-
-      // Load shifts (assigned + available) for current user / role
-
-      async function loadShiftsForCurrentUser() {
-        // clear current data
-        assignedShifts.length = 0;
-        availableShifts.length = 0;
-
-        if (!currentUser || !currentRole) {
-          renderShiftPools();
-          renderShifts();
-          return;
-        }
-
-        try {
-          // Employee's own assigned shifts
-          if (currentRole === "employee" && currentUser.dbId) {
-            const resAssigned = await fetch(`/api/shifts/user/${currentUser.dbId}`);
-            if (!resAssigned.ok) {
-              throw new Error("Failed to fetch user shifts");
-            }
-            const dataAssigned = await resAssigned.json();
-            const shifts = dataAssigned.shifts || [];
-
-            shifts.forEach((s) => {
-              assignedShifts.push({
-                id: s.id,
-                label: s.description || `Shift #${s.id}`,
-              });
-            });
-          }
-
-          // Available shifts (status = AVAILABLE) – same list for both roles
-          const resAvail = await fetch("/api/shifts/available");
-          if (!resAvail.ok) {
-            throw new Error("Failed to fetch available shifts");
-          }
-          const dataAvail = await resAvail.json();
-          const avail = dataAvail.shifts || [];
-
-          avail.forEach((s) => {
-            availableShifts.push({
-              id: s.id,
-              label: s.description || `Shift #${s.id}`,
-            });
-          });
-
-          renderShiftPools();
-          populateShiftOptions();
-          renderShifts();
-        } catch (err) {
-          console.error("Failed to load shifts:", err);
-          renderShiftPools();
-          renderShifts();
-        }
-      }
-
 
 
 
@@ -1774,6 +2068,9 @@
       const employeeReportSelect = document.getElementById("employee-report-select");
       const employeeReportOutput = document.getElementById("employee-report-output");
 
+      const downloadReportBtn = document.getElementById("employee-report-download");
+      if (downloadReportBtn) downloadReportBtn.classList.add("hidden");
+
       // Per-employee clocked-in status
 
       const employeeStatus = {}; // { username: { clockedIn: bool } }
@@ -1785,31 +2082,37 @@
         return employeeStatus[username];
       }
 
+      // Update attendance IN/OUT radio buttons based on current status
       function updateAttendanceControls() {
         const inRadio = document.querySelector('input[name="attendance-action"][value="in"]');
         const outRadio = document.querySelector('input[name="attendance-action"][value="out"]');
         if (!inRadio || !outRadio) return;
 
         if (!currentUser || currentRole !== "employee") {
-          inRadio.disabled = false;
+          // Not logged in as employee - disable both
+          inRadio.disabled = true;
           outRadio.disabled = true;
-          inRadio.checked = true;
+          inRadio.checked = false;
+          outRadio.checked = false;
           return;
         }
 
         const status = getEmployeeStatus(currentUser.username);
 
         if (status.clockedIn) {
+          // Currently clocked IN - only allow clock OUT
           inRadio.disabled = true;
           outRadio.disabled = false;
+          inRadio.checked = false;
           outRadio.checked = true;
         } else {
+          // Currently clocked OUT - only allow clock IN
           inRadio.disabled = false;
           outRadio.disabled = true;
           inRadio.checked = true;
+          outRadio.checked = false;
         }
       }
-
       // Notifications: { text, kind, indexRef, handled, targetRole, targetUser, seen }
       const notifications = [];
 
@@ -1884,7 +2187,7 @@
 
         if (viewName === "attendance") {
           // Reload attendance from DB
-          loadWorkHours();
+          loadAttendanceForCurrentUser();
         } else if (viewName === "leave") {
           // Reload leave from DB
           loadLeaveForCurrentUser();
@@ -1893,6 +2196,7 @@
           loadShiftsForCurrentUser();
           loadShiftRequestsForCurrentUser();
         } else if (viewName === "reports") {
+          if (downloadReportBtn) downloadReportBtn.classList.add("hidden");
           // For reports, make sure *all* DB-backed data is fresh
           Promise.all([
             loadAttendanceForCurrentUser(),
@@ -1976,179 +2280,395 @@
 
 
       // Render functions for tables
+      // Replace the entire renderAttendance function (around line 1448):
       function renderAttendance() {
-        attendanceHead.innerHTML = "";
-        attendanceRows.innerHTML = "";
+        // Only render old table if elements exist
+        if (attendanceHead && attendanceRows) {
+          attendanceHead.innerHTML = "";
+          attendanceRows.innerHTML = "";
 
-        const headRow = document.createElement("tr");
-        const thIndex = document.createElement("th");
-        thIndex.textContent = "#";
-        headRow.appendChild(thIndex);
-
-        if (currentRole === "hr") {
-          const thEmp = document.createElement("th");
-          thEmp.textContent = "Employee";
-          headRow.appendChild(thEmp);
-        }
-
-        const thAction = document.createElement("th");
-        thAction.textContent = "Action";
-        const thTime = document.createElement("th");
-        thTime.textContent = "Time";
-
-        headRow.appendChild(thAction);
-        headRow.appendChild(thTime);
-        attendanceHead.appendChild(headRow);
-
-        const rows =
-          currentRole === "employee" && currentUser
-            ? attendanceLog.filter((entry) => entry.user === currentUser.username)
-            : attendanceLog;
-
-        rows.forEach((entry, index) => {
-          const tr = document.createElement("tr");
-          const tdIndex = document.createElement("td");
-          tdIndex.textContent = (index + 1).toString();
-          tr.appendChild(tdIndex);
+          const headRow = document.createElement("tr");
+          const thIndex = document.createElement("th");
+          thIndex.textContent = "#";
+          headRow.appendChild(thIndex);
 
           if (currentRole === "hr") {
-            const tdEmp = document.createElement("td");
-            tdEmp.textContent = entry.displayName || `User #${entry.userId}` || (entry.user || "-");
-            tr.appendChild(tdEmp);
-          }
-          const tdAction = document.createElement("td");
-          const tdTime = document.createElement("td");
-
-          tdAction.textContent = entry.type === "in" ? "Clock in" : "Clock out";
-          tdTime.textContent = entry.time;
-
-          tr.appendChild(tdAction);
-          tr.appendChild(tdTime);
-          attendanceRows.appendChild(tr);
-        });
-        updateMetrics();
-        updateReports();
-      }
-        
-        function renderShifts() {
-          shiftRows.innerHTML = "";
-
-          const rows = shiftRequests;
-
-          if (rows.length === 0) {
-            const tr = document.createElement("tr");
-            const td = document.createElement("td");
-            td.colSpan = 5;
-            td.textContent = "No shift requests yet.";
-            tr.appendChild(td);
-            shiftRows.appendChild(tr);
-            return;
+            const thEmp = document.createElement("th");
+            thEmp.textContent = "Employee";
+            headRow.appendChild(thEmp);
           }
 
-          rows.forEach((req, index) => {
+          const thAction = document.createElement("th");
+          thAction.textContent = "Action";
+          const thTime = document.createElement("th");
+          thTime.textContent = "Time";
+          const thHours = document.createElement("th");
+          thHours.textContent = "Hours Worked";
+
+          headRow.appendChild(thAction);
+          headRow.appendChild(thTime);
+          headRow.appendChild(thHours);
+          attendanceHead.appendChild(headRow);
+
+          const rows =
+            currentRole === "employee" && currentUser
+              ? attendanceLog.filter((entry) => entry.user === currentUser.username)
+              : attendanceLog;
+
+          rows.forEach((entry, index) => {
             const tr = document.createElement("tr");
             const tdIndex = document.createElement("td");
-            const tdEmp = document.createElement("td");
-            const tdType = document.createElement("td");
-            const tdDetails = document.createElement("td");
-            const tdStatus = document.createElement("td");
-
             tdIndex.textContent = (index + 1).toString();
-
-            // Show employee name
-            const name = req.userDisplayName || req.user || "-";
-            tdEmp.textContent = name;
-
-            tdType.textContent = req.type;
-            tdDetails.textContent = (req.shiftLabel || "Shift") + (req.note ? " - " + req.note : "");
-
-            const statusInfo = formatStatus(req.status);
-            const statusPill = document.createElement("span");
-            statusPill.classList.add("pill-status");
-            if (statusInfo.cls) statusPill.classList.add(statusInfo.cls);
-            statusPill.textContent = statusInfo.label;
-            tdStatus.appendChild(statusPill);
-
             tr.appendChild(tdIndex);
-            tr.appendChild(tdEmp);
-            tr.appendChild(tdType);
-            tr.appendChild(tdDetails);
-            tr.appendChild(tdStatus);
 
-            shiftRows.appendChild(tr);
+            if (currentRole === "hr") {
+              const tdEmp = document.createElement("td");
+              tdEmp.textContent = entry.displayName || `User #${entry.userId}` || (entry.user || "-");
+              tr.appendChild(tdEmp);
+            }
+            const tdAction = document.createElement("td");
+            const tdTime = document.createElement("td");
+            const tdHours = document.createElement("td");
+
+            tdAction.textContent = entry.type === "in" ? "Clock in" : "Clock out";
+            tdTime.textContent = entry.time;
+
+            if (entry.type === "out" && entry.hoursWorked != null) {
+              tdHours.textContent = entry.hoursWorked.toFixed(2) + " hrs";
+            } else {
+              tdHours.textContent = "-";
+            }
+
+            tr.appendChild(tdAction);
+            tr.appendChild(tdTime);
+            tr.appendChild(tdHours);
+            attendanceRows.appendChild(tr);
           });
-
-          updateMetrics();
-          updateReports();
         }
 
-        // ========================================
-        // HANDLE SHIFT ACTION (HR APPROVAL/REJECTION)
-        // ========================================
-        async function handleShiftAction(index, newStatus) {
-          const req = shiftRequests[index];
-          if (!req) return;
-          if (!currentUser || currentRole !== "hr") return;
+        updateMetrics();
+        updateReports();
+        renderWorkHoursTable();
+      }
 
-          const requestId = req.id;
-          if (!requestId) {
-            console.error("Missing shift request id:", req);
-            return;
+      // ,......Add this function after the renderAttendance() function (around line 1350)
+
+      function renderWorkHoursTable() {
+        const tbody = document.querySelector('#workHoursTable tbody');
+        const weeklyTotalEl = document.getElementById('weeklyTotal');
+        const sectionTitle = document.querySelector('.work-hours-section .section-title');
+        const sectionBody = document.querySelector('.work-hours-section .section-body');
+
+        if (!tbody) return;
+
+        tbody.innerHTML = '';
+
+        // Update title and description based on role
+        if (sectionTitle) {
+          sectionTitle.textContent = currentRole === 'hr' ? 'All Employee Work Hours' : 'Work Hours Summary';
+        }
+        if (sectionBody) {
+          sectionBody.textContent = currentRole === 'hr'
+            ? 'Complete work hours for all employees.'
+            : 'Your recorded activity for the past 7 days.';
+        }
+
+        if (!currentUser) {
+          const tr = document.createElement('tr');
+          const td = document.createElement('td');
+          td.colSpan = 3;
+          td.textContent = 'Please log in to see work hours.';
+          td.style.textAlign = 'center';
+          td.style.color = 'var(--text-muted)';
+          tr.appendChild(td);
+          tbody.appendChild(tr);
+          if (weeklyTotalEl) weeklyTotalEl.innerHTML = 'TOTAL: <span class="total-highlight">0.00 Hours</span>';
+          return;
+        }
+
+        // Filter attendance based on role
+        let filteredAttendance;
+        if (currentRole === 'hr') {
+          // HR: show all employees, all time
+          filteredAttendance = attendanceLog;
+        } else {
+          // Employee: show only their own data
+          filteredAttendance = attendanceLog.filter(e => e.userId === currentUser.dbId);
+        }
+
+        const userAttendance = filteredAttendance
+          .map(e => {
+            const dt = new Date(e.time);
+            return { ...e, _dt: dt };
+          })
+          .filter(e => !isNaN(e._dt.getTime()))
+          .sort((a, b) => a._dt - b._dt); // Sort chronologically
+
+        if (userAttendance.length === 0) {
+          const tr = document.createElement('tr');
+          const td = document.createElement('td');
+          td.colSpan = 3;
+          td.textContent = 'No attendance records found.';
+          td.style.textAlign = 'center';
+          td.style.color = 'var(--text-muted)';
+          tr.appendChild(td);
+          tbody.appendChild(tr);
+          if (weeklyTotalEl) weeklyTotalEl.innerHTML = 'TOTAL: <span class="total-highlight">0.00 Hours</span>';
+          return;
+        }
+
+        console.log('User attendance (sorted):', userAttendance);
+
+        // Group by user if HR, otherwise just process as one user
+        const byUser = new Map();
+
+        userAttendance.forEach(entry => {
+          const userKey = currentRole === 'hr' ? entry.userId : currentUser.dbId;
+          if (!byUser.has(userKey)) {
+            byUser.set(userKey, {
+              userId: entry.userId,
+              displayName: entry.displayName || `User #${entry.userId}`,
+              events: []
+            });
+          }
+          byUser.get(userKey).events.push(entry);
+        });
+
+        console.log('Grouped by user:', byUser);
+
+        let totalMinutesAllUsers = 0;
+        const allSessions = [];
+
+        // Process each user's events
+        byUser.forEach((userData, userKey) => {
+          const events = userData.events;
+
+          // Pair IN/OUT events chronologically for this user
+          let currentIn = null;
+
+          events.forEach(entry => {
+            if (entry.type === 'in') {
+              currentIn = entry;
+            } else if (entry.type === 'out' && currentIn) {
+              // Complete session
+              allSessions.push({
+                userId: userData.userId,
+                displayName: userData.displayName,
+                inEvent: currentIn,
+                outEvent: entry,
+                date: currentIn._dt
+              });
+              currentIn = null;
+            }
+          });
+
+          // If there's an unpaired IN, add it as in-progress
+          if (currentIn) {
+            allSessions.push({
+              userId: userData.userId,
+              displayName: userData.displayName,
+              inEvent: currentIn,
+              outEvent: null,
+              date: currentIn._dt
+            });
+          }
+        });
+
+        console.log('All sessions:', allSessions);
+
+        // Sort sessions by date descending (most recent first)
+        allSessions.sort((a, b) => b.date - a.date);
+
+        allSessions.forEach(session => {
+          const tr = document.createElement('tr');
+
+          // Clock In / Out Times column
+          const tdTimes = document.createElement('td');
+          const stackDiv = document.createElement('div');
+          stackDiv.classList.add('time-stack');
+
+          const dateDiv = document.createElement('div');
+          dateDiv.classList.add('time-date');
+          dateDiv.textContent = session.date.toLocaleDateString('en-US', {
+            weekday: 'short',
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric'
+          });
+          stackDiv.appendChild(dateDiv);
+
+          // IN time
+          const inDiv = document.createElement('div');
+          inDiv.classList.add('time-entry');
+          inDiv.innerHTML = `<span>IN</span>${session.inEvent._dt.toLocaleTimeString('en-US', {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false
+          })}`;
+          stackDiv.appendChild(inDiv);
+
+          // OUT time (if exists)
+          if (session.outEvent) {
+            const outDiv = document.createElement('div');
+            outDiv.classList.add('time-entry');
+            outDiv.innerHTML = `<span>OUT</span>${session.outEvent._dt.toLocaleTimeString('en-US', {
+              hour: '2-digit',
+              minute: '2-digit',
+              hour12: false
+            })}`;
+            stackDiv.appendChild(outDiv);
           }
 
-          try {
-            const res = await fetch(`/api/shift-requests/${requestId}/status`, {
-              method: "PATCH",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                status: newStatus,
-                approverId: currentUser.dbId
-              })
+          tdTimes.appendChild(stackDiv);
+          tr.appendChild(tdTimes);
+
+          // Employee column - show employee name (important for HR view)
+          const tdEmployee = document.createElement('td');
+          tdEmployee.textContent = session.displayName;
+          tr.appendChild(tdEmployee);
+
+          // Duration column
+          const tdDuration = document.createElement('td');
+
+          if (session.outEvent) {
+            // Completed session
+            const durationMs = session.outEvent._dt - session.inEvent._dt;
+
+            if (durationMs > 0) {
+              const hours = (durationMs / (1000 * 60 * 60)).toFixed(2);
+              const minutes = Math.round(durationMs / (1000 * 60));
+              totalMinutesAllUsers += minutes;
+
+              tdDuration.innerHTML = `<div class="duration-main">${hours} hrs</div><div class="duration-sub status-text-complete">Completed</div>`;
+            } else {
+              // Negative duration (data issue)
+              tdDuration.innerHTML = `<div class="duration-incomplete">0.00 hrs</div><div class="duration-sub status-text-progress" style="color: #f97316;">Data Error</div>`;
+            }
+          } else {
+            // In progress (no OUT yet)
+            tdDuration.innerHTML = `<div class="duration-incomplete">—</div><div class="duration-sub status-text-progress">In Progress</div>`;
+          }
+
+          tr.appendChild(tdDuration);
+          tbody.appendChild(tr);
+        });
+
+        // Update total label based on role
+        if (weeklyTotalEl) {
+          const totalHours = (totalMinutesAllUsers / 60).toFixed(2);
+          const totalLabel = currentRole === 'hr' ? 'TOTAL (All Employees)' : 'TOTAL';
+          weeklyTotalEl.innerHTML = `${totalLabel}: <span class="total-highlight">${totalHours} Hours</span>`;
+        }
+      }
+      // Add this function after the notifications array declaration (around line 1200)
+
+      function addNotification({ text, kind, indexRef, targetRole, targetUser }) {
+        notifications.push({
+          text: text,
+          kind: kind,           // "leave" | "shift" | "attendance"
+          indexRef: indexRef,   // reference to the request index
+          handled: false,
+          targetRole: targetRole,   // "employee" | "hr"
+          targetUser: targetUser,   // specific username if targeting employee
+          seen: false
+        });
+        renderNotifications();
+      }
+
+      function renderNotifications() {
+        notifList.innerHTML = "";
+
+        // Filter notifications based on role
+        const filtered = notifications.filter((n) => {
+          if (!n.targetRole) return true;  // show to all
+
+          if (currentRole === "hr" && n.targetRole === "hr") {
+            return !n.handled;  // HR only sees unhandled
+          }
+
+          if (currentRole === "employee" && n.targetRole === "employee") {
+            if (n.targetUser && currentUser && n.targetUser !== currentUser.username) {
+              return false;  // not for this employee
+            }
+            return true;  // show to this employee
+          }
+
+          return false;
+        });
+
+        const count = filtered.length;
+
+        if (count === 0) {
+          notifCount.classList.add("hidden");
+          notifTitle.textContent = "Notifications";
+          const li = document.createElement("li");
+          li.textContent = "No new notifications.";
+          li.style.color = "var(--text-muted)";
+          notifList.appendChild(li);
+          return;
+        }
+
+        notifCount.textContent = count.toString();
+        notifCount.classList.remove("hidden");
+
+        const unseenCount = filtered.filter(n => !n.seen).length;
+        if (unseenCount > 0) {
+          notifTitle.textContent = `Notifications (${unseenCount} new)`;
+        } else {
+          notifTitle.textContent = "Notifications";
+        }
+
+        filtered.forEach((notif, i) => {
+          const li = document.createElement("li");
+          li.style.opacity = notif.seen ? "0.6" : "1";
+
+          const textDiv = document.createElement("div");
+          textDiv.textContent = notif.text;
+          li.appendChild(textDiv);
+
+          // HR can approve/reject from the bell
+          if (currentRole === "hr" && !notif.handled) {
+            const actions = document.createElement("div");
+            actions.classList.add("notif-actions");
+
+            const approveBtn = document.createElement("button");
+            approveBtn.classList.add("notif-approve");
+            approveBtn.textContent = "Approve";
+            approveBtn.addEventListener("click", async function () {
+              notif.handled = true;
+
+              if (notif.kind === "leave") {
+                await handleLeaveAction(notif.indexRef, "APPROVED");
+              } else if (notif.kind === "shift") {
+                await handleShiftAction(notif.indexRef, "APPROVED");
+              }
+
+              renderNotifications();
             });
 
-            if (!res.ok) {
-              const errData = await res.json().catch(() => ({}));
-              throw new Error(errData.message || "Failed to update shift request status");
-            }
+            const rejectBtn = document.createElement("button");
+            rejectBtn.classList.add("notif-reject");
+            rejectBtn.textContent = "Reject";
+            rejectBtn.addEventListener("click", async function () {
+              notif.handled = true;
 
-            const data = await res.json();
-            const updated = data.shiftRequest || {};
+              if (notif.kind === "leave") {
+                await handleLeaveAction(notif.indexRef, "REJECTED");
+              } else if (notif.kind === "shift") {
+                await handleShiftAction(notif.indexRef, "REJECTED");
+              }
 
-            // Normalize status
-            const rawStatus = (updated.status || newStatus || "PENDING").toUpperCase();
-            let baseStatus;
-            if (rawStatus === "APPROVED") baseStatus = "Approved";
-            else if (rawStatus === "REJECTED") baseStatus = "Rejected";
-            else baseStatus = "Pending";
+              renderNotifications();
+            });
 
-            req.status = baseStatus;
-            req.approvedBy = updated.approved_by || null;
-            req.approvedAt = updated.approved_at || null;
-
-            // Notify employee if we have their username
-            if (req.user) {
-              addNotification({
-                text:
-                  "Your " +
-                  req.type +
-                  " request for " +
-                  (req.shiftLabel || "shift") +
-                  " was " +
-                  baseStatus,
-                kind: "shift",
-                indexRef: index,
-                targetRole: "employee",
-                targetUser: req.user
-              });
-            }
-
-            renderShifts();
-            renderNotifications();
-          } catch (err) {
-            console.error("handleShiftAction error:", err);
-            alert("Could not update shift request status. Please try again.");
+            actions.appendChild(approveBtn);
+            actions.appendChild(rejectBtn);
+            li.appendChild(actions);
           }
-}
+
+          notifList.appendChild(li);
+        });
+      }
 
       // HR-only: update leave status via API and refresh UI
 
@@ -2324,6 +2844,7 @@
             wrapper.appendChild(toggleBtn);
             wrapper.appendChild(menu);
 
+
             tdStatus.appendChild(wrapper);
           } else {
             // Employee view: just show the pill
@@ -2370,19 +2891,34 @@
             const tdIndex = document.createElement("td");
             const tdLabel = document.createElement("td");
             tdIndex.textContent = (index + 1).toString();
-            tdLabel.textContent = s.label;
+
+            // Badge if current user has a pending DROP or TRADE request for this assigned shift
+            let labelText = s.label || `Shift #${s.id}`;
+            const pendingForShift = shiftRequests.filter(r =>
+              r.shiftId === s.id &&
+              r.userId === (currentUser && currentUser.dbId) &&
+              r.status === "Pending"
+            );
+            const hasAssignedPending = pendingForShift.some(r => r.type === "Drop" || r.type === "Trade");
+            if (hasAssignedPending) {
+              const r = pendingForShift.find(x => x.type === "Drop" || x.type === "Trade");
+              const badgeText = r.type === "Drop" ? "DROP requested" : "TRADE requested";
+              labelText += ` <span style="background: rgba(234, 179, 8, 0.2); color: #facc15; padding: 2px 8px; border-radius: 999px; font-size: 10px; margin-left: 6px;">${badgeText}</span>`;
+            }
+
+            tdLabel.innerHTML = labelText;
             tr.appendChild(tdIndex);
             tr.appendChild(tdLabel);
             myShiftRows.appendChild(tr);
           });
         }
 
-        // Available shifts (same for everyone)
+        // Available shifts
         availableShiftRows.innerHTML = "";
         if (availableShifts.length === 0) {
           const tr = document.createElement("tr");
           const td = document.createElement("td");
-          td.colSpan = 2;
+          td.colSpan = currentRole === "hr" ? 3 : 2;
           td.textContent = "No available shifts at the moment.";
           tr.appendChild(td);
           availableShiftRows.appendChild(tr);
@@ -2391,20 +2927,73 @@
             const tr = document.createElement("tr");
             const tdIndex = document.createElement("td");
             const tdLabel = document.createElement("td");
+
+
             tdIndex.textContent = (index + 1).toString();
-            tdLabel.textContent = s.label;
+
+            // Badge if current user has a pending PICK_UP request for this available shift
+            // or a pending TRADE request that exposes this shift for trade (we mark via s.isTrade from loadShiftsForCurrentUser)
+            let labelText = s.label || `Shift #${s.id}`;
+
+            const pendingForShift = shiftRequests.filter(r =>
+              r.shiftId === s.id &&
+              r.userId === (currentUser && currentUser.dbId) &&
+              r.status === "Pending"
+            );
+
+            const pickUpPending = pendingForShift.some(r => r.type === "Pick up");
+            const tradePending = s.isTrade === true; // already computed when loading avail shifts
+
+            if (pickUpPending) {
+              labelText += ` <span style="background: rgba(34, 197, 94, 0.18); color: #86efac; padding: 2px 8px; border-radius: 999px; font-size: 10px; margin-left: 6px;">PICK UP requested</span>`;
+            }
+            if (tradePending) {
+              labelText += ` <span style="background: rgba(234, 179, 8, 0.3); color: #facc15; padding: 2px 8px; border-radius: 999px; font-size: 10px; margin-left: 6px;">TRADE</span>`;
+            }
+
+            tdLabel.innerHTML = labelText;
+
             tr.appendChild(tdIndex);
             tr.appendChild(tdLabel);
+
+            if (currentRole === "hr") {
+              const tdActions = document.createElement("td");
+              const delBtn = document.createElement("button");
+              delBtn.classList.add("btn-small");
+              delBtn.textContent = "Delete";
+              delBtn.addEventListener("click", async function () {
+                if (!confirm("Delete this shift?")) return;
+                try {
+                  await deleteShiftApi(s.id);
+                  await loadShiftsForCurrentUser();
+                  renderShiftPools();
+                  populateShiftOptions();
+                  alert("Shift deleted successfully!");
+                } catch (err) {
+                  console.error("Delete shift failed:", err);
+                  alert("Could not delete shift: " + err.message);
+                }
+              });
+              tdActions.appendChild(delBtn);
+              tr.appendChild(tdActions);
+            }
+
             availableShiftRows.appendChild(tr);
           });
         }
       }
 
+      // Populate shift options based on selected action
       function populateShiftOptions() {
         const action = shiftActionSelect.value;
-        let list = getMyShifts();
-        if (action === "Pick up") {
+        let list = [];
+
+        if (action === "Trade") {
+          list = assignedShifts;  // trade FOR available shifts
+        } else if (action === "Pick up") {
           list = availableShifts;
+        } else if (action === "Drop") {
+          list = assignedShifts;  // drop FROM assigned shifts
         }
 
         shiftSelect.innerHTML = "";
@@ -2421,141 +3010,22 @@
         });
       }
 
-      function renderNotifications() {
-        let visible = [];
-        if (!currentRole) {
-          visible = [];
-        } else if (currentRole === "hr") {
-          visible = notifications.filter((n) => n.targetRole === "hr");
-          notifTitle.textContent = "Pending approvals";
-        } else if (currentRole === "employee" && currentUser) {
-          visible = notifications.filter(
-            (n) => n.targetRole === "employee" && n.targetUser === currentUser.username
-          );
-          notifTitle.textContent = "Updates from HR";
+      // Delete shift API call for HR
+      async function deleteShiftApi(shiftId) {
+        if (!currentUser || currentRole !== "hr") return;
+
+        if (!shiftId || Number.isNaN(parseInt(shiftId, 10))) {
+          throw new Error("Invalid shift ID");
         }
 
-        let pending = [];
-        if (currentRole === "hr") {
-          pending = visible.filter((n) => !n.handled);
-        } else if (currentRole === "employee") {
-          pending = visible.filter((n) => !n.seen);
+        const res = await fetch(`/api/shifts/${shiftId}`, { method: "DELETE" });
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          throw new Error(err.message || `HTTP ${res.status}: Shift not found or already deleted`);
         }
-
-        if (pending.length === 0) {
-          notifCount.classList.add("hidden");
-        } else {
-          notifCount.classList.remove("hidden");
-        }
-        notifCount.textContent = pending.length.toString();
-
-        notifList.innerHTML = "";
-        if (visible.length === 0) {
-          const li = document.createElement("li");
-          li.textContent = "No notifications yet.";
-          notifList.appendChild(li);
-          return;
-        }
-
-        visible.forEach((n) => {
-          const li = document.createElement("li");
-
-          const textSpan = document.createElement("span");
-          textSpan.textContent = n.text;
-          li.appendChild(textSpan);
-
-          if (currentRole === "employee") {
-            if (n.seen) {
-              const s = document.createElement("span");
-              s.classList.add("muted");
-              s.textContent = "Seen";
-              li.appendChild(s);
-            }
-          }
-
-          if (!n.handled && currentRole === "hr" && n.targetRole === "hr") {
-            const actions = document.createElement("div");
-            actions.classList.add("notif-actions");
-
-            const approveBtn = document.createElement("button");
-            approveBtn.classList.add("notif-approve");
-            approveBtn.textContent = "Approve";
-            const globalIndex = notifications.indexOf(n);
-            approveBtn.addEventListener("click", function () {
-              handleNotification(globalIndex, true);
-            });
-
-            const rejectBtn = document.createElement("button");
-            rejectBtn.classList.add("notif-reject");
-            rejectBtn.textContent = "Reject";
-            rejectBtn.addEventListener("click", function () {
-              handleNotification(globalIndex, false);
-            });
-
-            actions.appendChild(approveBtn);
-            actions.appendChild(rejectBtn);
-            li.appendChild(actions);
-          } else if (n.handled && currentRole === "hr" && n.targetRole === "hr") {
-            const status = document.createElement("span");
-            status.classList.add("muted");
-            status.textContent = "Already handled";
-            li.appendChild(status);
-          }
-
-          notifList.appendChild(li);
-        });
       }
-
-      function addNotification(payload) {
-        notifications.push({
-          text: payload.text,
-          kind: payload.kind,
-          indexRef: payload.indexRef != null ? payload.indexRef : null,
-          handled: payload.handled || false,
-          targetRole: payload.targetRole || "hr",
-          targetUser: payload.targetUser || null,
-          seen: false,
-        });
-        renderNotifications();
-      }
-
-      function removeShiftFromPool(pool, shiftId) {
-        const idx = pool.findIndex((s) => s.id === shiftId);
-        if (idx === -1) return null;
-        const [removed] = pool.splice(idx, 1);
-        return removed;
-      }
-
-      function handleNotification(notifIndex, approved) {
-        const notif = notifications[notifIndex];
-        if (!notif || notif.targetRole !== "hr") return;
-
-        // Mark this notification as handled (for HR view)
-        notif.handled = true;
-
-        if (notif.kind === "leave") {
-          // main leave handler so DB + UI stay in sync
-          const newStatus = approved ? "APPROVED" : "REJECTED";
-          // This will:
-          // - PATCH /api/leave/:id/status
-          // - update leaveRequests[index]
-          // - send a notification to the employee
-          // - re-render leave + notifications
-          handleLeaveAction(notif.indexRef, newStatus);
-
-        } else if (notif.kind === "shift") {
-          // Reuse the same DB-backed handler that the inline table actions use
-          const newStatus = approved ? "APPROVED" : "REJECTED";
-          handleShiftAction(notif.indexRef, newStatus);
-        }
-
-        // Final refresh of the bell UI
-        renderNotifications();
-      }
-
 
       // Load employees from backend for HR shift dropdown + reports
-
       async function loadEmployeesForHr() {
         if (!currentUser || currentRole !== "hr") return;
 
@@ -2587,9 +3057,7 @@
         }
       }
 
-
-      // Populate HR shift 
-
+      // Populate HR shift employee select dropdown
       function populateHrEmployeeSelect() {
         // Clear HR shift employee select
         hrShiftEmployee.innerHTML = "";
@@ -2625,14 +3093,82 @@
         });
       }
 
+      // Store for PDF download
+      let lastReportUserId = null;
+      let lastReportUserName = null;
+
+      // Helper functions for PDF generation
+      function formatDatePretty(d) {
+        return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+      }
+
+      function formatTimePretty(d) {
+        return d.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: false });
+      }
+
+      function isWithinLast7Days(dateObj) {
+        const now = new Date();
+        const start = new Date(now);
+        start.setDate(now.getDate() - 6);
+        start.setHours(0, 0, 0, 0);
+        const d = new Date(dateObj);
+        return d >= start && d <= now;
+      }
+
+      function buildAttendanceSummaryRowsForUser(userDbId) {
+        const userRows = attendanceLog
+          .filter(e => e.userId === userDbId)
+          .map(e => ({ ...e, _dt: new Date(e.time) }))
+          .filter(e => e._dt instanceof Date && !isNaN(e._dt))
+          .filter(e => isWithinLast7Days(e._dt))
+          .sort((a, b) => a._dt - b._dt);
+
+        const byDay = new Map();
+        userRows.forEach(e => {
+          const key = e._dt.toDateString();
+          if (!byDay.has(key)) byDay.set(key, []);
+          byDay.get(key).push(e);
+        });
+
+        const summary = [];
+        for (const [key, events] of byDay.entries()) {
+          const ins = events.filter(x => x.type === "in");
+          const outs = events.filter(x => x.type === "out");
+          const inEvent = ins.length ? ins[0] : null;
+          const outEvent = outs.length ? outs[outs.length - 1] : null;
+          const dateObj = inEvent?._dt || outEvent?._dt || new Date(key);
+          const dateLabel = formatDatePretty(dateObj);
+          const inTime = inEvent ? formatTimePretty(inEvent._dt) : "—";
+          const outTime = outEvent ? formatTimePretty(outEvent._dt) : "—";
+          let status = "In Progress";
+          let durationMinutes = null;
+          if (inEvent && outEvent) {
+            status = "Completed";
+            durationMinutes = Math.max(0, Math.round((outEvent._dt - inEvent._dt) / 60000));
+          }
+          summary.push({ dateLabel, inTime, outTime, status, durationMinutes });
+        }
+        summary.sort((a, b) => new Date(b.dateLabel) - new Date(a.dateLabel));
+        return summary;
+      }
+
+      function minutesToHoursMinutes(mins) {
+        const h = Math.floor(mins / 60);
+        const m = mins % 60;
+        return `${h}h ${m}m`;
+      }
+
+      // Generate employee report
       function generateEmployeeReport(employeeIdStr) {
         const empId = parseInt(employeeIdStr, 10);
         if (!empId || Number.isNaN(empId)) {
           employeeReportOutput.innerHTML = "Invalid employee.";
+          lastReportUserId = null;
+          lastReportUserName = null;
+          if (downloadReportBtn) downloadReportBtn.classList.add("hidden");
           return;
         }
 
-        // Find employee meta from hrEmployees (loaded from /api/users/employees)
         let empMeta = null;
         if (Array.isArray(hrEmployees) && hrEmployees.length > 0) {
           empMeta = hrEmployees.find((e) => e.dbId === empId) || null;
@@ -2640,6 +3176,13 @@
 
         const empName = empMeta ? empMeta.fullName : `User #${empId}`;
         const empStaffId = empMeta && empMeta.staffId ? ` (${empMeta.staffId})` : "";
+
+        // Store for PDF download
+        lastReportUserId = empId;
+        lastReportUserName = empName;
+
+        // Show download button
+        if (downloadReportBtn) downloadReportBtn.classList.remove("hidden");
 
         // ATTENDANCE: match by userId (and fall back to staffId if present)
         const empAttendance = attendanceLog.filter((e) => {
@@ -2807,9 +3350,35 @@
           "</div>";
 
         employeeReportOutput.innerHTML = html;
-
-
       }
+
+      // Employee report handler (HR only in practice)
+      if (employeeReportForm) {
+        employeeReportForm.addEventListener("submit", function (e) {
+          e.preventDefault();
+          const employeeId = employeeReportSelect.value;
+          if (!employeeId) {
+            employeeReportOutput.innerHTML =
+              "Please select an employee to generate a report.";
+            // Hide download button when no employee selected
+            if (downloadReportBtn) downloadReportBtn.classList.add("hidden");
+            return;
+          }
+          generateEmployeeReport(employeeId);
+        });
+      }
+
+      // Clear report when selection changes
+      if (employeeReportSelect) {
+        employeeReportSelect.addEventListener("change", function () {
+          employeeReportOutput.innerHTML =
+            "Select an employee to view a summary of their attendance, leave and shift activity for this session.";
+          lastReportUserId = null;
+          lastReportUserName = null;
+          if (downloadReportBtn) downloadReportBtn.classList.add("hidden");
+        });
+      }
+
       // QR SCAN HANDLER – this is where a real QR library would call into
       function handleQrScan(scannedId) {
         const id = (scannedId || "").trim();
@@ -2855,22 +3424,6 @@
         if (qrScanStatus) {
           qrScanStatus.textContent = "Camera scanner ready. Awaiting QR code...";
         }
-
-        /*
-          Example with html5-qrcode (for when you go real):
-  
-          const html5QrCode = new Html5Qrcode("qr-camera-container");
-          html5QrCode.start(
-            { facingMode: "environment" },
-            { fps: 10, qrbox: 250 },
-            (decodedText) => {
-              handleQrScan(decodedText);   // <--- this updates attendance
-            },
-            (errorMessage) => {
-              // optional: handle scan errors
-            }
-          );
-        */
       }
 
       // LOGIN LOGIC
@@ -2908,15 +3461,17 @@
           const displayName = displayNameParts.join(" ") || user.userId;
 
           currentRole = roleFromDb;
-
           currentUser = {
             role: roleFromDb,
-            username: user.userId,     // staff_id style
-            dbId: user.id,             // numeric users.id -> for attendance_logs.user_id
+            username: user.userId,
+            dbId: user.id,
             displayName: displayName,
             roleId: user.roleId,
             departmentId: user.departmentId
           };
+
+          // ensure HR sees Reports + Download PDF
+          applyRoleVisibility();
 
           userRoleLabel.textContent = currentRole === "employee" ? "Employee" : "HR / Admin";
           userNameLabel.textContent = currentUser.displayName;
@@ -3006,8 +3561,14 @@
         const status = getEmployeeStatus(currentUser.username);
 
         // Prevent invalid sequences
-        if (type === "in" && status.clockedIn) return;
-        if (type === "out" && !status.clockedIn) return;
+        if (type === "in" && status.clockedIn) {
+          alert("You are already clocked in. Please clock out first.");
+          return;
+        }
+        if (type === "out" && !status.clockedIn) {
+          alert("You are not clocked in. Please clock in first.");
+          return;
+        }
 
         try {
           // Save to DB
@@ -3018,21 +3579,34 @@
             qrValue: null
           });
 
-          // Push what we got from DB into our in-memory list
+          const timeString = log.recorded_at || new Date().toISOString();
+
           attendanceLog.push({
             user: currentUser.username,
+            userId: currentUser.dbId,
+            displayName: currentUser.displayName,
             type: type,
-            time: log.recorded_at
-              ? new Date(log.recorded_at).toLocaleString()
-              : new Date().toLocaleString()
+            time: timeString,  // ✅ ISO format
+            hoursWorked: log.hoursWorked || null
           });
+
 
           // Update state (clocked in/out)
           status.clockedIn = type === "in";
 
+          // Show success message
+          const actionText = type === "in" ? "clocked in" : "clocked out";
+          const timeDisplay = new Date(log.recorded_at || new Date()).toLocaleTimeString('en-US', {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false
+          });
+          alert(`✓ Successfully ${actionText} at ${timeDisplay}`);
+
+
+          renderAttendance();
           updateAttendanceControls();
           updateReports();
-          loadWorkHours();
         } catch (err) {
           console.error("Attendance save failed:", err);
           alert("Could not save attendance. Please try again.");
@@ -3167,9 +3741,19 @@
             return;
           }
 
-          let pool = getMyShifts();
-          if (action === "Pick up") {
+          // Determine which pool to use based on action
+          let pool = [];
+          let sourcePool = "ASSIGNED";
+
+          if (action === "Trade") {
+            pool = availableShifts;  // choosing what you want to trade for
+            sourcePool = "AVAILABLE";
+          } else if (action === "Pick up") {
             pool = availableShifts;
+            sourcePool = "AVAILABLE";
+          } else if (action === "Drop") {
+            pool = assignedShifts;
+            sourcePool = "ASSIGNED";
           }
 
           const selected = pool.find((s) => String(s.id) === String(selectedShiftId));
@@ -3180,18 +3764,17 @@
 
           const shiftId = selected.id;
           const requestType = toDbShiftRequestType(action);   // PICK_UP / DROP / TRADE
-          const source = inferShiftRequestSource(action);     // AVAILABLE / ASSIGNED
 
           try {
             const res = await fetch("/api/shift-requests", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
-                userId: currentUser.dbId,   // numeric users.id
+                userId: currentUser.dbId,
                 shiftId: shiftId,
                 requestType,
                 note,
-                source,
+                source: sourcePool,  // what pool this request is about
               }),
             });
 
@@ -3252,13 +3835,22 @@
               targetRole: "hr",
             });
 
+            alert(`${typeLabel} request submitted successfully!`);
             renderShifts();
             updateReports();
             shiftForm.reset();
+
+            // Reload latest requests and shifts so badges reflect “… requested”
+            await loadShiftRequestsForCurrentUser();
+            await loadShiftsForCurrentUser();
+
+            alert(`${action} request submitted successfully!`);
+            shiftForm.reset();
             populateShiftOptions();
+            renderShiftPools();
           } catch (err) {
             console.error("Shift request submit failed:", err);
-            alert("Could not submit shift request. Please try again.");
+            alert("Could not submit shift request: " + err.message);
           }
         });
       }
@@ -3269,20 +3861,15 @@
         e.preventDefault();
         if (!currentUser || currentRole !== "hr") return;
 
-        // value is users.id (numeric) from populateHrEmployeeSelect()
         const empIdStr = hrShiftEmployee.value;
         const desc = hrShiftDesc.value.trim();
 
-        if (!empIdStr || !desc) {
-          alert("Please select an employee and enter a shift description.");
+        if (!desc) {
+          alert("Please enter a shift description.");
           return;
         }
 
-        const assignedToId = parseInt(empIdStr, 10);
-        if (!assignedToId || Number.isNaN(assignedToId)) {
-          alert("Invalid employee selected.");
-          return;
-        }
+        const assignedToId = empIdStr ? parseInt(empIdStr, 10) : null;
 
         try {
           const res = await fetch("/api/shifts", {
@@ -3290,42 +3877,39 @@
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               description: desc,
-              assignedToId: assignedToId,  // still recorded if your backend uses it
-              status: "AVAILABLE",        // 🔹 key change so it appears in Available hospital shifts
+              assignedToId: assignedToId,
+              status: "AVAILABLE",
             })
           });
 
           if (!res.ok) {
             const errData = await res.json().catch(() => ({}));
-            throw new Error(errData.message || "Failed to create shift");
+            throw new Error(errData.message || `HTTP ${res.status}`);
           }
 
-          alert("Shift created successfully.");
+          const data = await res.json();
+          console.log("Shift created:", data);
+          const assignedLabel =
+            assignedToId && hrShiftEmployee.selectedIndex > 0
+              ? hrShiftEmployee.options[hrShiftEmployee.selectedIndex].textContent
+              : null;
 
+          const msg = assignedLabel
+            ? `Shift created and assigned to ${assignedLabel}.`
+            : "Shift created as AVAILABLE (no employee selected).";
+
+          alert(msg);
           hrShiftForm.reset();
-
-          // Refresh shifts from backend so the new one appears under Available hospital shifts
+          hrShiftEmployee.value = "";
+          // Refresh shifts
           await loadShiftsForCurrentUser();
+          renderShiftPools();
           populateShiftOptions();
         } catch (err) {
           console.error("Failed to create shift:", err);
-          alert("Could not create shift. Please try again.");
+          alert("Could not create shift: " + err.message);
         }
       });
-
-      // Employee report handler (HR only in practice)
-      if (employeeReportForm) {
-        employeeReportForm.addEventListener("submit", function (e) {
-          e.preventDefault();
-          const employeeId = employeeReportSelect.value; // users.id
-          if (!employeeId) {
-            employeeReportOutput.innerHTML =
-              "Please select an employee to generate a report.";
-            return;
-          }
-          generateEmployeeReport(employeeId);
-        });
-      }
 
       // Shift action change -> refresh list of shifts to choose from
       shiftActionSelect.addEventListener("change", populateShiftOptions);
@@ -3344,6 +3928,272 @@
         });
       }
 
+
+      // Show/hide Reports tab and PDF button based on role
+      function applyRoleVisibility() {
+        const reportsLink = document.querySelector('.nav-link[data-target="reports"]');
+        if (currentRole === "hr") {
+          if (reportsLink) reportsLink.classList.remove("hidden");
+          if (downloadReportBtn) downloadReportBtn.classList.remove("hidden");
+        } else {
+          if (reportsLink) reportsLink.classList.add("hidden");
+          if (downloadReportBtn) downloadReportBtn.classList.add("hidden");
+        }
+      }
+
+      // Call after login role is set
+      // In login success handler, after setting currentRole/currentUser:
+      applyRoleVisibility();
+
+      // Also call when toggling views or roles:
+      toggleEmployee.addEventListener("click", function (e) {
+        e.preventDefault();
+        switchRole("employee");
+        applyRoleVisibility();
+      });
+      toggleHr.addEventListener("click", function (e) {
+        e.preventDefault();
+        switchRole("hr");
+        applyRoleVisibility();
+      });
+
+      // PDF export handler (unchanged)
+      if (downloadReportBtn) {
+        downloadReportBtn.classList.add("hidden");
+        downloadReportBtn.addEventListener("click", function () {
+          const { jsPDF } = window.jspdf;
+          const doc = new jsPDF({ unit: "pt", format: "a4" });
+
+          let userId, employeeName, empStaffId;
+
+          if (currentRole === "employee") {
+            userId = currentUser.dbId;
+            employeeName = currentUser.displayName;
+            empStaffId = currentUser.username ? ` (${currentUser.username})` : "";
+          } else {
+            if (!lastReportUserId) {
+              alert("Generate a report first.");
+              return;
+            }
+            userId = lastReportUserId;
+            employeeName = lastReportUserName || `User #${userId}`;
+
+            // Get staff ID from hrEmployees - MOVED HERE BEFORE USING IT
+            const empMeta = hrEmployees.find(e => e.dbId === userId);
+            empStaffId = empMeta && empMeta.staffId ? ` (${empMeta.staffId})` : "";
+          }
+
+          // NOW GET THE DATA - after userId is set
+          const empAttendance = attendanceLog.filter(e => e.userId === userId);
+          const empLeaves = leaveRequests.filter(r => r.userId === userId);
+          const empShiftReqs = shiftRequests.filter(r => r.userId === userId);
+
+          let y = 40;
+
+          // HEADER
+          doc.setFontSize(16);
+          doc.setFont(undefined, 'bold');
+          doc.text("K.R.O.N.O.S – Employee Report", 40, y);
+          y += 25;
+
+          doc.setFontSize(12);
+          doc.setFont(undefined, 'normal');
+          doc.text(`Employee: ${employeeName}${empStaffId}`, 40, y);
+          y += 16;
+          doc.text(`Generated: ${new Date().toLocaleString()}`, 40, y);
+          y += 25;
+
+          // SECTION 1: ATTENDANCE
+          doc.setFontSize(13);
+          doc.setFont(undefined, 'bold');
+          doc.text("Attendance Summary", 40, y);
+          y += 16;
+
+          doc.setFontSize(10);
+          doc.setFont(undefined, 'normal');
+
+          const totalAttendance = empAttendance.length;
+          const clockIns = empAttendance.filter(e => e.type === "in").length;
+          const clockOuts = empAttendance.filter(e => e.type === "out").length;
+
+          let lastIn = "-";
+          let lastOut = "-";
+          for (let i = empAttendance.length - 1; i >= 0; i--) {
+            if (lastIn === "-" && empAttendance[i].type === "in") {
+              lastIn = empAttendance[i].time;
+            }
+            if (lastOut === "-" && empAttendance[i].type === "out") {
+              lastOut = empAttendance[i].time;
+            }
+            if (lastIn !== "-" && lastOut !== "-") break;
+          }
+
+          doc.text(`• Total records: ${totalAttendance} (Clock-ins: ${clockIns}, Clock-outs: ${clockOuts})`, 40, y);
+          y += 14;
+          doc.text(`• Last clock-in: ${lastIn}`, 40, y);
+          y += 14;
+          doc.text(`• Last clock-out: ${lastOut}`, 40, y);
+          y += 20;
+
+          // Attendance table (last 7 days)
+          doc.setFontSize(11);
+          doc.setFont(undefined, 'bold');
+          doc.text("Last 7 Days Detail", 40, y);
+          y += 14;
+
+          const rows = buildAttendanceSummaryRowsForUser(userId);
+
+          doc.setFontSize(9);
+          doc.setFont(undefined, 'normal');
+          doc.text("Date", 40, y);
+          doc.text("In", 140, y);
+          doc.text("Out", 220, y);
+          doc.text("Duration", 300, y);
+          doc.text("Status", 380, y);
+          y += 12;
+
+          let totalMinutes = 0;
+
+          if (rows.length === 0) {
+            doc.text("No attendance records in last 7 days.", 40, y);
+            y += 12;
+          } else {
+            rows.forEach(r => {
+              if (y > 760) {
+                doc.addPage();
+                y = 40;
+              }
+
+              doc.text(r.dateLabel, 40, y);
+              doc.text(r.inTime, 140, y);
+              doc.text(r.outTime, 220, y);
+
+              const duration = r.durationMinutes == null ? "—" : minutesToHoursMinutes(r.durationMinutes);
+              doc.text(duration, 300, y);
+              doc.text(r.status, 380, y);
+              y += 12;
+
+              if (r.durationMinutes != null) {
+                totalMinutes += r.durationMinutes;
+              }
+            });
+          }
+
+          y += 6;
+          doc.setFont(undefined, 'bold');
+          doc.text(`Total hours (last 7 days): ${minutesToHoursMinutes(totalMinutes)}`, 40, y);
+          y += 25;
+
+          // SECTION 2: LEAVE & ABSENCE
+          if (y > 680) {
+            doc.addPage();
+            y = 40;
+          }
+
+          doc.setFontSize(13);
+          doc.setFont(undefined, 'bold');
+          doc.text("Leave & Absence", 40, y);
+          y += 16;
+
+          doc.setFontSize(10);
+          doc.setFont(undefined, 'normal');
+
+          const totalLeaves = empLeaves.length;
+          const leavesApproved = empLeaves.filter(r => r.status === "Approved").length;
+          const leavesPending = empLeaves.filter(r => r.status === "Pending").length;
+          const leavesRejected = empLeaves.filter(r => r.status === "Rejected").length;
+
+          doc.text(`• Total requests: ${totalLeaves}`, 40, y);
+          y += 14;
+          doc.text(`• Approved: ${leavesApproved}, Submitted: ${leavesPending}, Denied: ${leavesRejected}`, 40, y);
+          y += 18;
+
+          if (empLeaves.length > 0) {
+            doc.setFont(undefined, 'bold');
+            doc.text("Recent Leave Requests:", 40, y);
+            y += 14;
+
+            doc.setFont(undefined, 'normal');
+            const recentLeaves = empLeaves.slice(-5);
+            recentLeaves.forEach(r => {
+              if (y > 760) {
+                doc.addPage();
+                y = 40;
+              }
+              const fromDate = (r.from || r.from_date || "").toString().split("T")[0];
+              const toDate = (r.to || r.to_date || "").toString().split("T")[0];
+              doc.text(`• ${fromDate} → ${toDate} – ${r.reason} (${r.status})`, 45, y);
+              y += 12;
+            });
+          } else {
+            doc.text("No leave requests in this session.", 40, y);
+            y += 12;
+          }
+
+          y += 20;
+
+          // SECTION 3: SHIFT ACTIVITY
+          if (y > 680) {
+            doc.addPage();
+            y = 40;
+          }
+
+          doc.setFontSize(13);
+          doc.setFont(undefined, 'bold');
+          doc.text("Shift Activity", 40, y);
+          y += 16;
+
+          doc.setFontSize(10);
+          doc.setFont(undefined, 'normal');
+
+          const assignedCount = currentRole === "employee" ? assignedShifts.length : 0;
+          const totalShiftReqs = empShiftReqs.length;
+          const shiftApproved = empShiftReqs.filter(r => r.status === "Approved").length;
+          const shiftPending = empShiftReqs.filter(r => r.status === "Pending").length;
+          const shiftRejected = empShiftReqs.filter(r => r.status === "Rejected").length;
+
+          const tradeCount = empShiftReqs.filter(r => r.type === "Trade").length;
+          const pickUpCount = empShiftReqs.filter(r => r.type === "Pick up").length;
+          const dropCount = empShiftReqs.filter(r => r.type === "Drop").length;
+
+          doc.text(`• Current assigned shifts: ${currentRole === "employee" ? assignedShifts.length : "N/A"}`, 40, y);
+          y += 14;
+          doc.text(`• Total shift requests: ${totalShiftReqs} (Trade: ${tradeCount}, Pick up: ${pickUpCount}, Drop: ${dropCount})`, 40, y);
+          y += 14;
+          doc.text(`• Approved: ${shiftApproved}, Submitted: ${shiftPending}, Denied: ${shiftRejected}`, 40, y);
+          y += 18;
+
+          if (empShiftReqs.length > 0) {
+            doc.setFont(undefined, 'bold');
+            doc.text("Recent Shift Requests:", 40, y);
+            y += 14;
+
+            doc.setFont(undefined, 'normal');
+            const recentShifts = empShiftReqs.slice(-5);
+            recentShifts.forEach(r => {
+              if (y > 760) {
+                doc.addPage();
+                y = 40;
+              }
+              const shiftLabel = r.shiftDescription || r.shiftLabel || `Shift #${r.shiftId}`;
+              doc.text(`• ${r.type} – ${shiftLabel} (${r.status})`, 45, y);
+              if (r.note) {
+                y += 11;
+                doc.setFontSize(9);
+                doc.text(`  Note: ${r.note}`, 50, y);
+                doc.setFontSize(10);
+              }
+              y += 12;
+            });
+          } else {
+            doc.text("No shift requests in this session.", 40, y);
+            y += 12;
+          }
+
+          doc.save(`KRONOS_Report_${employeeName.replace(/\s+/g, "_")}.pdf`);
+        });
+      }
+
       // Initial state
       showView("dashboard");
       updateMetrics();
@@ -3355,125 +4205,15 @@
       switchRole("employee");
       renderAttendance();
       updateAttendanceControls();
-      
-
-    
-// Helper to format decimal hours to HH:MM:SS
-      function formatDecimalToTime(decimalHours) {
-        if (!decimalHours) return "00:00:00";
-        const totalSeconds = Math.floor(decimalHours * 3600);
-        const h = Math.floor(totalSeconds / 3600);
-        const m = Math.floor((totalSeconds % 3600) / 60);
-        const s = totalSeconds % 60;
-        return `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
-      }
-
-      /**
- * Loads and displays work hours from the backend
- */
-async function loadWorkHours() {
-  const tableBody = document.querySelector("#workHoursTable tbody");
-  const weeklyTotalDiv = document.getElementById("weeklyTotal");
-
-  // Reset UI
-  tableBody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 20px; color: #64748b;">Loading...</td></tr>';
-  weeklyTotalDiv.innerHTML = 'TOTAL: <span class="total-highlight">...</span>';
-
-  if (!currentUser || !currentUser.dbId) {
-    tableBody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 20px; color: #64748b;">Please log in to view work hours.</td></tr>';
-    weeklyTotalDiv.innerHTML = 'TOTAL: <span class="total-highlight">0.00 Hours</span>';
-    return;
-  }
-
-  try {
-    const res = await fetch(`/api/attendance/user/${currentUser.dbId}/hours`);
-    if (!res.ok) throw new Error("Failed to fetch hours");
-
-    const data = await res.json();
-    
-    // Update Total Footer
-    weeklyTotalDiv.innerHTML = `TOTAL: <span class="total-highlight">${data.weeklyTotal} Hours</span>`;
-
-    if (!data.days || data.days.length === 0) {
-      tableBody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 20px; color: #64748b;">No work activity found.</td></tr>`;
-      return;
-    }
-
-    // Clear loading message
-    tableBody.innerHTML = '';
-
-    data.days.forEach(day => {
-      const tr = document.createElement("tr");
-      
-      // Format Date
-      const dateObj = new Date(day.date);
-      const dateStr = dateObj.toLocaleDateString('en-US', { 
-        month: 'short', 
-        day: 'numeric', 
-        year: 'numeric' 
-      });
-
-      // Determine Status and Audit
-      let statusHtml = '';
-      let auditHtml = '';
-      let durationHtml = '';
-
-      if (day.incomplete) {
-        statusHtml = `<span class="status-text-progress">IN PROGRESS</span>`;
-        auditHtml = `<span class="audit-badge audit-in">Clocked In</span>`;
-        durationHtml = `<div class="duration-incomplete">—</div>`;
-      } else {
-        statusHtml = `<span class="status-text-complete">Complete</span>`;
-        auditHtml = `<span class="audit-badge audit-synced">Synced</span>`;
-        
-        // Format duration as HH:MM:SS
-        const totalSeconds = Math.floor(day.totalHours * 3600);
-        const h = Math.floor(totalSeconds / 3600);
-        const m = Math.floor((totalSeconds % 3600) / 60);
-        const s = totalSeconds % 60;
-        const hhmmss = `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
-        
-        durationHtml = `
-          <div class="duration-main">${hhmmss}</div>
-          <div class="duration-sub">${day.totalHours} hrs</div>
-        `;
-      }
-
-      // Format times
-      const clockInDisplay = day.clockIn || '--:--';
-      const clockOutDisplay = day.clockOut && day.clockOut !== '-' ? day.clockOut : 'PENDING';
-
-      tr.innerHTML = `
-        <td>
-          <div class="time-stack">
-            <div class="time-date">${dateStr}</div>
-            <div class="time-entry"><span>IN:</span> ${clockInDisplay}</div>
-            <div class="time-entry"><span>OUT:</span> ${clockOutDisplay}</div>
-          </div>
-        </td>
-        <td>${durationHtml}</td>
-        <td>${statusHtml}</td>
-        <td>Web Dashboard</td>
-        <td style="text-align: right;">${auditHtml}</td>
-      `;
-
-      tableBody.appendChild(tr);
-    });
-
-  } catch (err) {
-    console.error('Load work hours error:', err);
-    tableBody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 20px; color: #f87171;">Failed to load work hours. Please try again.</td></tr>';
-    weeklyTotalDiv.innerHTML = 'TOTAL: <span class="total-highlight">Error</span>';
-  }
-}
-      
-            
-        
 
       // Hide Reports tab by default (no user yet)
       const reportsLinkInit = document.querySelector('.nav-link[data-target="reports"]');
       if (reportsLinkInit) reportsLinkInit.classList.add("hidden");
     })();
+
+
+
+
   </script>
 </body>
 
